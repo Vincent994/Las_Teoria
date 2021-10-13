@@ -33,3 +33,44 @@ Ipotesi 3: Firewall che cambi i mac address sorgente ma non estraneo a spoofing
 Ipotesi 4: VLAN creo una rete virtuale locale
 PORT BASED: In uno switch decido che alcune porte appartengono ad una VLAN e le altre ad un'altra VLAN, i pacchetti non passano dalle porte di VLAN diverse.
 TRANKING MODE: Una porta può appartenere a VLAN diverse, riceve i pacchetti di entrambe, ma se il pacchetto è contarassegnato allora è destinato alla VLAN corretta.
+
+
+LDAP
+Snmp ed Ldap sono completamente diversi. SNMP ha il compito di RACCOGLIERE informazioni per poter costruire una piattaforma di monitoraggio centralizzata, da elementi della rete.
+LDAP ha il compito di DISTRIBUIRE informazioni a partire da una piattaforma di configurazione centralizzata verso gli elementi della rete.
+Un sistema correttamente funzionante dipende da parecchi file di configurazione, ma in una rete possono esserci centinaia di macchine che hanno gli stessi file di configurazione, magari con piccole differenze. Per questo nasce l'esigenza di condividere queste informazioni tra sistemi diversi a partire da un database centralizzato.
+Scelta della sorgente: 
+- NSS (Name Service Switch): sistema generale per selezionare il name services(fonte dei nomi)
+- PAM sistema modulare per l'autenticazione
+Perchè Ldap?
+Ldap implementa il concetto di directory service ( standard definito dall'ITU al numero X.500). Questo standard definisce come costruire un database modellato sul concetto di "elenco telefonico": gerarchico (nazione-provincia-città) letture superiori alle scritture, non relazionale (no transazioni, basta un lock se devo scrivere), altamente disponibile(deve essere replicato , se non è accessibile nessuno può accedere).
+Il protocollo LDAP (TCP porta 389) è strutturato sul modello client-server, dove i client effettuano le ricerche, mentre i server mantengono le informazioni; inoltre in caso un server non abbia le informazioni richieste, in maniera simile ai DNS, può richiederle ad un altro server (sfruttando la possibilità di organizzare i server secondo gerarchia ad albero).E' costituito da uno schema per l'assegnazione dei nomi (il naming model) che identifica il singolo dato all'interno del sistema, una parte per l'organizzazione dei data (il data model) che permette di stabilire come venga rappresentata l'informazione ed una modalità per accesso ai dati. Il protocollo non definisce come queste operazioni debbano essere implementate, ma lascia i singoli server liberi di scegliere l'implementazione di preferenza, tuttavia definisce quale sia il funzionamento logico delle operazioni (ricerca, comparazione,aggiunta,rimozione,modifica ecc) e quale sia lo schema astratto LDIF per trattare i dati.
+Modello dei dati: La base di dati della directory può esser e un qualsiasi sistema di archiviazione, purchè esista un modulo che espone un'interfacccia detta DBI in grado di pilotare il backend. DBI gestisce una serie di entry (o object):
+Le entries consistono in una serie di attributi.
+Gli attributi hanno un tipo e un valore (molteplici).
+Ogni entries ha un DN (Distinguish name) che permette di identificare univocamente la entry all'interno dell'albero detto  DIT, che rappresenta come la base di dati viene esposta al mondo. Il DIT ha origine in una entry speciale detta base o suffix.La scelta di usare una gerarchia per organizzare le informazioni consente da un lato un facile partizionamento ai fini dell'amministrazione(un determinato nodo intermedio amministra il sottoalbero), del controllo degli accessi (non devo dare accesso a ogni singolo elemento del sottoalbero), e della collocazione fisica (posso posizionare i server i posti diversi). Tuttavia vincola gli utilizzatori ad una determinata vista dell'organizzazione.
+
+Replicazione: LDAP prevede nativamente meccanismi per l'alta disponibilità aiutato dalla sua stessa struttura, che prevede rare scritture. Esistono due modelli base:
+- modello multimaster (modello corrente): tutti i server accettano scritture, si fa uso di protocolli ad-hoc per aggiornare reciprocamente i vari DBI
+- modello master-replica (storico ma diffuso): questo modello prevede la presennza di un server master che accetta le scritture e di uno o più reolica che accettano le letture. Periodicamente viene effettuata una copia dal master ai replica per aggiornare i dati. Di questo modello ne esistono tre varianti:
+    - On master: il master accetta scritture e letture, mentre i replica solamente letture. Periodicamente il DBI dei server replica viene aggiornato dal master (il client deve sapere chi è cosa).
+    - By referral: in caso il client chieda una scrittura ad un server replica riceverà come risposta l'indirizzo del master su cui effettuarla. Il mastero automaticamente si occupa di propagare la modifica richiesta.
+    -By chain: in caso il client chieda una scrittura ad un server replica questo finge di poterla effettuare, ma in realtà ricorsivamente ripeterà la richiesta al master che ritornerà il risultato ed aggiornerà il DIT dei server replica (tipo PROXY).
+E' inoltre possibile suddividere un DIT in più partizioni e collocarle su server differenti. Questo viene fatto per ottenere prestazioni migliori (si deve cercare all'interno di un albero più piccolo),per distinguere i dati su base geografica o amministrativa. Per realizzare ciò sono sufficienti due link che colleghino il sottoalbero con l'albero principale: (lato server principale) un subordinate knowledge link che permette al server principale di connettere logicamente il proprio albero con il sottoalbero contenuto nel server secondario (chi sta sotto) ed un Superior knowledge link (lato server delegato) che contiene l'url del server principale (chi sta sopra).
+
+Formato delle entry: Una entry è una collezione di attributi, che a differenza di un oggetto di un linguaggio OO non è definito da una variabile di un dato tipo, ma direttamente dal tipo e da un valore (int 4). Tra gli attributi ce ne sono due che sono sempre presenti:dn, che specifica il DN della entry, e objectClass, che specifica quale sia/siano la classe/i a cui la entry appartiene. Una classe vincola quali attributi una entry debba avere obbligatoriamente e quali facoltativamente. Tra gli attributi è necessario sceglierne uno che faccia da "Relative Distinguished Name" (unico tra le entry aventi lo stesso BDN), che, associato al "Base Distinguished Name"(che identifica la entry a cui si sta attaccando la entry attuale),da come risulato il DN della entry. Tramite LDIF è infine possibile definire attributi e classi personalizzati.
+
+Definizione dei tipi di attributo
+Un attributeType è simile ad un tipo in un linguaggio di programmazione, ma "pompato", occorre infatti specificare le regole di matching per stabilire i criteri di confronto (ORDENING,EQUALITY,SUBSTRING). Tra gli attributeType più comuni abbiamo cn,dc,o,c ecc
+
+Classi:
+Lo scopo essenziale delle ObjectClass è di elencare gli attiburi MUST e MAY di una entry. Le classi possono essere di tre tipi:
+- ABSTRACT servono per creare la tassonomia di categorie di oggetti, non possono istanziare(originare) entry da queste (animale,vegetale ad esempio).
+- STRUCTURAL servono per descrivere categorie, quindi oggetti concrete (cane,gatto)
+- AUXILIARY servono per descrivere collezioni di attributi non direttamente collegate a specifiche categorie , servono ad arricchire (fascicolo sanitario)
+Ogni entry deve avere una e una sola classe strutturale, uno o più classi ausiliarie. 
+A differenza dei linguaggi OO alla Java, qui posso avere eredeitarietà multipla: in Java non posso ottenerla con le classi, poichè potrei ereditare metodi con lo stesso nome ma che fanno cose diverse (quale scegliere?). Qui invece il tipo dell'attributo è definito in modo separato e quindi unico, non ci sono conflitti. Anche per le classi esistono numeroso objectClass definite: organization, person,ecc 
+Abbiamo visto come deve essere fatto un objectClass e un attributeType che compongono una entry, vediamo come collocare le entry nel DIT(albero). Nello schema non vi è scritto come è fatto ma solo i modelli su come costrutire le entry. In LDAP ho un identificativo univio DISTINGUISHED NAME. Esso è formato da RDN+BDN (Relative, equivale al nome locale. Base nome nodo a cui appendo la entry)
+La radice dell'albero è l'ultimo elemento del DN ,cosa opposta per i nomi assoluti del filesystem.
+Per inserire una nuova definizione di classe,attributi ecc all'interno dello schema, bisogno inserire una entry in un albero speciale ,il DIT di configurazione che contiene direttive di configurazione scritte come se fossero enry LDAP. 
+Operazioni: SEARCH,COMPARE,ADD,DELETE,MODIFY ecc 
