@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitolo_2</title>
+</head>
+
+<body>
+    <h3 style="color: coral">2.1 Livello 2 di harderning</h3>
+    <p>Nel primo livello si gestisce la fase di avvio e la scelta di componenti autentiche , ora ci occupiamo
+        dell'accesso alle risorse. Tutti i sistemi di accesso alle risorse seguono una sequenza di 4 passi:</p>
+    <ul>
+        <li>IDENTIFICAZIONE permette di determinare <b>chi richiede l'accesso</b></li>
+        <div>Il modo più classico è l'utilizzo di username</div>
+        <li>AUTENTICAZIONE permette di verificare se chi richiede l'accesso <b>ha le credenziali per farlo?</b></li>
+        <div>Per ottenere questo risultato spesso si ricorre ad una prova dell'identità:</div>
+        <ul>
+            <li><b>Qualcosa che sei</b> conferma l'identità per mezzo di un dato biometrico</li>
+            <li><b>Qualcosa che hai</b> conferma l'identità per mezzo di un oggetto smart-card,token,smartphone</li>
+            <li><b>Qualcosa che sai</b> conferma l'identità dimostrando la conoscenza di un segreto: password </li>
+        </ul>
+        <h5>Spesso i primi due passi inglobati ma meno sicuro, esempio sblocco smartphone</h5>
+        <li>AUTORIZZAZIONE permette di decidere se può eseguire l'operazione richiesta </li>
+        <div>Linux permette di settare limiti d'uso ,da parte di ogni processo e risorse.Efficace per prevenire deny of
+            service accidentali(SAFETY) o malevoli (SECURITY)
+            In inglese la sicurezza si divide in salvaguardia contro incidenti interni(SAFETY) e contro gli attacchi
+            esterni (SECURITY).
+            Un sistema è sicuro se è resistente ad entrambi
+        </div>
+        <li>AUDITING permette di tracciare le operazioni rilevanti e fare diagnostica: chi ha tentato di fare cosa</li>
+    </ul>
+    <hr>
+    <h3 style="color: coral">2.2 Controllo dell'accesso</h3>
+    <p>Di base il controllo dell'accesso consiste nel decidere se un soggetto può esegure un'operazione su un
+        oggetto/risorsa. Questa relazione può essere espressa
+        per tutto il sistema per mezzo di una matrice completa in cui le righe specificano i soggetti e le colonne gli
+        oggetti;ogni cella contiene quali siano i permessi associati
+        a quel soggetto per quella risorsa. Poichè la matrice sarebbe enorme e la maggior parte delle celle sarebbe
+        vuota , conviene partizionarla:
+    <ul>
+        <li>per soggetto (capability list) fornisce una lista di permessi per ogni soggetto e contiene solo gli oggetti
+            per i quali ha permessi diversi dal default.
+            Modello MAC: la proprietà di un oggetto non consente di modificare i permessi <br>
+            la policy è decisa da un security manager <br>
+            è espressa da capability lists <br>
+        </li>
+        <li>
+            per oggetto (access control list) fornisce una lista di permessi per ogni oggetto all'interno del sistema,
+            contiene solamente i soggetti i cui permessi sono diversi da quelli di default.
+            Il filesystem UNIX implementa una ACL rigida in cui sono specificati tre soggetti utente, gruppo,other.
+        </li>
+    </ul>
+    </p>
+    <hr>
+    <h3 style="color: coral">2.3 Autorizzazione su filesystem UNIX</h3>
+    <p>Ogni file è descritto da un i-node su cui, tra le altre cose, sono memorizzate le informazioni
+        sull'autorizzazione. Queste informazioni comprendono utente gruppo e permessi espressi tramite 12 bit
+        che rappresentano i permessi standard e speciali. I permessi standard specificano i cosa possono fare i soggetti
+        UGO (n.b le directory sono file il cui contenuto è un elenco di coppie nome_file i-node)
+    </p>
+    <ul>
+        <li><b>R:</b></li> per i file lettura del file, per le cartelle elenco dei file nella cartella
+        <li><b>W:</b></li> per i file scrittura sul file, per le cartelle aggiunta/rinomina cancellazione di file in
+        essa(anche quelli di proprietà altrui)
+        <li><b>X:</b></li> per i file esecuzione del file, per le directory lookup dell'i-node, navigazione in essa
+    </ul>
+    <div>I permessi speciali consentono di definire comportamenti particolari per quanto riguarda l'utente proprietario
+        il gruppo o altri utenti</div>
+    <ul>
+        <li><b>SUID</b> per i file (solo su quelli eseguibili) fa si che venga eseguito con identità del proprietario
+        </li>
+        <li><b>SGID</b> per i file stesso effetto ma per quanto riguarda i gruppi. Per le directory consente ad un
+            utente appartenente al gruppo proprietario della directory di creare in automatico file avente come gruppo
+            proprietario quello della directory padre</li>
+        <li><b>STICKY</b> per i file eseguibili suggerisce al SO di mantenere in cache una copia DESUETO. Per le
+            directory impone che tutti i file siano cancellabili solo dai rispettivi proprietari IMPORTANTE</li>
+    </ul>
+
+    <h3 style="color: coral">2.4 Cenni di crittografia</h3>
+    <p>Per garantire la riservatezza così come paternità e integrità delle informazioni è possibile ricorrere alla
+        crittografia, ovvero la disciplina che studia la trasformazione dei dati al
+        fine di nascondere il loro contenuto semantico.
+        La crittografia consiste in due operazioni: <b>Cifratura</b> (encryption) che consente di ottenere dal testo in
+        chiaro un testo cifrato, e un'operazione duale <b>Decifratura</b> (decryption) che consente di ottenre il testo
+        in chiaro da quello cifrato.</p>
+    <div> c=E(m) m=D(c) </div>
+
+    <div> Inizialmente la sicurezza dell'algoritmo era affidata alla segretezza dell'algoritmo stesso, ma una volta
+        scoperto questo perdeva la sicurezza. Nel 1883 Kerkoffs enuncia i tre principi per la sicurezza delle
+        informazioni </div>
+
+    <ol>
+        <li><b>Il sistema deve essere praticamente, se non matematicamente, indecifrabile</b></li>
+        <li><b>L'algoritmo non deve essere segreto , deve essere segreta la chiave</b></li>
+        <li><b>La sua chiave deve essere comunicabile senza l'aiuto di note scritte, e sostituibile o modificabile </b>
+        </li>
+    </ol>
+    <p>La disciplina che studia la robustezza degli algoritmi crittografici è la CRITTOANALISI. <b>Un buon algoritmo
+            deve essere in grado di occultare le proprietà del testo in chiaro</b> (per tollerare analisi statistiche
+        che riuscirebbero a notare eventuali distribuzioni nel testo
+        cifrato), <b>rendere la chiave indistinguibile dalle altre</b> (sicurezza assoluta) o rendere il processo di
+        ricerca della chiave talmente complesso da essere materialmente troppo oneroso in termini di tempo (sicurezza
+        computazionale)</p>
+
+    <h4 style="color:dodgerblue">2.4.1 Crittografia Simmetrica</h4>
+    <p> Questa tipologia prevede l'utilizzo di una singola chiave per cifrare/decifrare i messaggi.Esempi di cifrari
+        classici:</p>
+    <ul>
+        <li><b>Cifrario a sostituzione mono alfabetica</b> (esempio cifrario di Cesare) ogni lettera viene sostituita
+            con quella x posizioni avanti nell'alfabeto, dove x è la chiave di cifratura.
+            Vulnerabile all'analisi delle frequenze</li>
+        <li><b>Cifrario a trasposizione</b>( scitala spartana ) tabella scritta per colonne e letta per righe, la chiave
+            è costituita dalle dimensioni della tabella. Algoritmo vulnerabile all'analisi statistica ma se applicato
+            ripetutamente può offrire buoni livelli di sicurezza </li>
+        <li><b>Cifrario a sostituzione poli alfabetica</b> (macchina Enigma) si considera ogni lettera corrispondente al
+            suo valore posizionale all'interno dell'alfabeto e si somma il valore ad ogni lettra del testo con quello
+            corrispondente all'interno della chiave.
+            Una possibilità di attacco consiste nell'analisi del testo facendo ipotesi sul contenuto. Durante la II
+            Guerra Mondiale Alan Touring con il suo Colossus decifrò Enigma grazie alle parole sempre presenti nei
+            bollettini dei nazisti come Heil Hitler ecc.
+        </li>
+        <li><b>One-time pad</b> permette di raggiungere un livello di sicurezza perfetto tramite la scelta di una chiave
+            che sia completamente casuale, lunga quanto il messaggio e mai usata.</li>
+    </ul>
+    <p>Gli algoritmi moderni si basano sugli stessi principi di confusione (operazione di sostituzione) e di diffusione
+        (trasposizione) delle informazioni, usano però l'alfabeto binario e non inglese.Sono studiati per essere
+        computazionalmente sicuri e la loro sicurezza sta nella lunghezza della chiave.
+        Tipo di attacco è la forza bruta (trovare la chiave). Standard storico 56 bit: DES sviluppato dagli USA con IBM
+        Standard attuale 256 bit AES.
+        Esempio di tempo necessario per trovare una chiave in base a lunghezza e budget
+    <ul>
+        <li>Budget Lunghezza chiave </li>
+        <li> 56 80 128</li>
+        <li>1k$ 38 anni 640 milioni di anni 10^21 anni</li>
+        <li>1M$ 19 giorni 100 mila anni 10^18 anni</li>
+        <li>1G$(nasa) 12 secondi 6 anni 10^14 anni</li>
+    </ul>
+    </p>
+    <h4 style="color:dodgerblue">2.4.2 Crittografia Asimmetrica</h4>
+    <p>La crittografia asimmetrica consiste nell'utilizzo di due chiavi distine, delle quali una è in grado di cifrare
+        l'altra di decifrarlo, idealmente non è possibile ricavare una chiave dall'altra.
+        La crittografia asimmetrica può essere usata sia per proteggere la riservatezza delle informazioni (si cifra con
+        la chiave pubblica di chi deve ricevere il messaggio, che verrà poi decifrata con quella privata), sia
+        per garantire la paternità delle informazioni(si cifra con la propria chiave privata, e decifrando con la chiave
+        pubblica).
+        Queste tecniche hanno il vantagguio di risolvere il problema della distribuzione delle chiavi. Tuttavia sono
+        algoritmi lenti. Per questo si usa un approccio ibrido: i dati cifrati con la crittogradia simmetrica e le
+        chiavi vengono scambiate usando
+        la crittografia asimmetrica
+        Esistono operazioni facili in un verso e computazionalmente impossibili nell'altro, a meno di conoscere un
+        segreto:
+    <ul>
+        <li>fattorizzazione di grandi numeri generati da numeri primi</li>
+        <li>operazioni in aritmentica modulare: f(op1,op2)mod n; come risultato si prende il risultato lo si divide per
+            n e si prende il resto</li>
+    </ul>
+
+    RSA(1977) Leonard Adleman Ronald Rivest Adi Shamir inventarono questo algoritmo per creare un cifrario asimmetrico ,
+    ho 2 chiavi, una per cifrare e una per decifrare. Generazione delle chiavi:
+    <ol type="A">
+        <li>Si scelgono due numeri primi molto elevati p e q</li>
+        <li>Viene calcolato il modulo n=p*q</li>
+        <li>Viene scelto un numero d non multiplo dei numeri primi e si calcola e tale che e*d mod (p-1)(q-1)=1</li>
+    </ol>
+    Questa operazione risulta facile se conosco p e q, che vengono dimenticati e non possono essere calcolati conoscendo
+    n
+    <ul>
+        <li><b>CHIAVE PUBBLICA</b> (e,n) posso diffonderla</li>
+        <li><b>CHIAVE PRIVATA</b> (d,n) va nascosta</li>
+        <li>Operazione di cifratura c=m^e mod n; dove m è il messaggio ed in informatica qualsiasi informazione è un
+            numero</li>
+        <li>Operazione di decifratura m=c^d mod n</li>
+    </ul>
+    </p>
+    <h4 style="color: brown;">2.4.3 Funzioni hash</h4>
+    <p>Una funzione di hash è una funzione a senso unico non invertivile che mappa una stringa di lunghezza arbitraria
+        in una di lunghezza predefinita.
+        Essendo il dominio infinito e il codominio finito esistono però infiniti input che generano lo stesso output, ma
+        nella realtà è molto difficile
+
+    </p>
+    <h4 style="color: brown;">2.4.4 Secure shell SSH</h4>
+    <p>SSH, successore di Telnet canale non confidenziale,nasce dalla necessità di amministrare da remoto una
+        macchina.Il collegamento tra client e server è cifrato ed autenticato in modo da garantire la sicurezza
+        della comunicazione,e viene stabilito in cinque passi essenziali:
+    <ol type="A">
+        <li>Negoziazione dei cifrari disponibili da usare (simmetrici/asimmetrici)</li>
+        <li>Autenticazione dell'host remoto per mezzo della sua chiave pubblica. L'host remoto dimostra di essere
+            veramente lui, mediante un sistema di autenticazione attiva ( sfida-risposta ).</li>
+        <li>Inizializzazione di un canale di comunicazione cifrato</li>
+        <li>Negoziazione dei metodi disponibili per l'autenticazione dell'utente</li>
+        <li>Autenticazione dell'utente (passiva(inserendo la password)-attiva(tramite chiavi))</li>
+    </ol>
+    N.B Il punto chiave è l'autenticazione dell'host remoto a cui mi voglio connettere, la chiave pubblica deve essere
+    veramente la sua. Non avendo un notaio che verifica le chiavi e utile verificare la chiave con un metodo out-of-band
+    per verificare la correttezza della chiave: server la tua chiave è questa ?
+    Alle connessioni successive la chiave pubblica dell'host remoto è memorizzata in /home/utente/.ssh/know_hosts .
+    Se volessi effettuare un'autenticazione attiva, quindi senza battere la password:
+    <ul>
+        <li>Genero una coppia di chiavi con <b>ssh-keygen -t rsa -b 2048 </b></li>
+        <li>Copio sull host remoto la mia chiave pubblica che si trova in /home/utente/.ssh/id_rsa.pub <b>ssh-copy-id
+                las@192.168.56.20x: </b></li>
+    </ul>
+    <div>N.B E' molto importante proteggere la chiave privata, magari cifrandola, e gestire i permessi della directory
+        /.ssh , se sono troppo "larghi" non ci si fida delle chiavi contenute</p>
+    </div>
+
+    <h3 style="color: coral">2.5 Vulnerabilità ed attacchi</h3>
+    <div>Terminologia:</div>
+    <ul>
+        <li><b>Minaccia</b> (threat) un atto ostile intenzionale (oggetto della security) o meno (oggetto della safety)
+            che ha qualsiasi effetto negativo sulle risorse o sugli utenti del sistema </li>
+        <li><b>Vulnerabilità</b> (vulnerability) un difetto nelle misure a protezione del sistema o dei dati che può
+            essere strutturale nell'hardware o sofware. Una vulnerabilità può dipendere dalla configurazione del sistema
+            o da un uso scorretto (es navigare come root)</li>
+        <li><b>Exploit</b> ( si pronuncia cosi ) uno strumento,tecnico (crack sw/hw) o umano (social engineering es
+            phishing), per trarre vantaggio da una vulnerabilità concretizzando una minaccia. L'obiettivo è far eseguire
+            ad un processo operazioni per cui non era stato pensato (3 obbiettivi) fermaare il processo DoS, dirottare
+            il flusso di esecuzione, ottenere privilegi di root</li>
+        <li><b>Analisi del rischio</b> il potenziale danno immateriale, perdita economica, o distruzione di risorse che
+            risulterebbe dall'azione di una minaccia che riuscisse a sfruttare una vulnerabilità. R (risk)= Impatto (I)
+            * Probabilità(P) di un attacco </li>
+    </ul>
+    <h4 style="color: blue;">2.5.1 Classificazione delle minacce</h4>
+    <p>In relazione agli obiettivi della sicurezza( integrità, accessibilità, disponibilità, e riservatezza) si tende a
+        dividere le minaccie in più categorie:</p>
+    <ul>
+        <li><b>Intercettazione </b>(snooping): questa categoria indica sia i rischi relativi all'intercettazione non
+            autorizzata di informazioni che l'accesso non autorizzata a dati e documenti.
+            Può essere implementata con diverse tecniche, generalmente passive, che vanno dall'intercettazione eseguita
+            con mezzi fisici all'uso di sw (sniffer). In generale si risponde a questo tipo di
+            minacce tramite tecniche basate sulla crittografia che consentono di cifrare il traffico
+        </li>
+        <li><b>Alterazione</b> questa categoria copre tutte quelle minacce che hanno come scopo la modifica non
+            autorizzata di dati ed informazioni. Di norma gli attacchi che ricadono in questa categoria fanno uso di
+            tecniche attive, e possono
+            essere contrastati tramite tecniche volte a garantire l'integrità dei dati (cifrazione con chiave privata ad
+            esempio nella critt. asimmetrica)</li>
+        <li><b>Mascheramento</b> (spoofing) questa categoria racchiude tutte quelle minacce che si basano nel
+            presentarsi con un'identità differente da quella reale( es phishing,spoofing). Le tecniche usate possono
+            essere sia passive che attive, e possono
+            essere contrastati tramite tecniche che preservino l'integrità e consentano l'autenticazione</li>
+        <li><b>Blocco</b> appartengono a questa categoria tutti quegli attacchi che hanno come scopo l'impedimento o il
+            ritardo dell'erogazione di un servizio. Tecniche usate sono sempre di carattere attivo</li>
+    </ul>
+    <h4 style="color: blue;">2.5.2 Vulnerabilità del codice</h4>
+    <p>Una prima causa di vulnerabilità è il codice. Queste vulnerabilità possono presentarsi sia perchè il codice
+        prodotto è di bassa qualità (non sono state rispettate le best practice di coding e test) sia perchè i
+        produttori hanno reazioni inadeguate alla scoperta di una vulnerabilità ( se dopo il rilascio viene scoperta una
+        vulnerabilità e diffusa in rete da un black hat, una volta scoperta da un ricercatore white hat allora ho uno 0
+        days
+        (un problema che al giorno zero, in cui viene scoperto, ha già un'elevata probabilità di avere un impatto
+        concreto. Se il produttore sviluppa una patch allora il rischio inizia a scendere con la diffusione della patch.
+        Ma spesso vi sono ritardi nel rilascio di patch per questioni di soldi o di immagine nell'ammettere la
+        vulnerabilità. Cosa accade nella realtà? Richiamare i produttori all'ordine con quella che si chiama RESPONSIBLE
+        DISCLOSURE divulgazione responsabile.
+        Il white hack che la scopre notifica il produtore e lo rende anche di dominio pubblico, omettendo i dettagli, in
+        questo modo rende al corrente l'utente e pressa il produttore).Queste vulnerabilità del codice possono essere
+        divise in 2 macro-categorie:
+    <ul>
+        <li>Attacchi <b>data-driven</b> attraverso l'immisione di dati dall'esterno si fa breccia nel sistema : esempio
+            SQL injection, cross site scripting, stack overflow, buffer overflow</li>
+        <li>Attacchi <b> basati su logiche di accesso errate </b> autenticazione errata (troppo debole), errori nella
+            gestione delle autorizzazioni (permessi assegnati male) </li>
+    </ul>
+    </p>
+    <h4 style="color: blue;">2.5.2.1 Attacchi data-driven sw/hw</h4>
+    <p>
+    <ul>
+        <div>sw</div>
+        <li><b>SQL injection</b> tecnica di code injection, usata per attaccare applicazioni di gestione dati, con la
+            quale vengono inserite stringhe di codice SQL malevole all'interno di campi di input in modo che vengano
+            eseguite (ad esempio per inviare il contenuto all'attaccante).
+            Sfrutta le vulnerabilità di sicurezza del codice di un'applicazione, ad esempio quando l'input dell'utente
+            viene inserito all'interno di istruzioni SQL senza che venga correttamente filtrato da caratteri di escape
+            "" o istruzioni SQL non previste</li>
+        <li><b>CROSS SITE SCRIPTING XSS</b> vulnerabilità che afflige siti web dinamici che impiegano un insufficiente
+            controllo dell'input nei form. Un XSS permette ad un cracker(pirata informatico) di inserire o eseguire
+            codice lato client
+            al fine di attuare un insieme variegato di attacchi quali, ad esempio, raccolta,manipolazione e
+            reindirizzamento delle informazioni riservate; visualizzazione e modifica di dati presenti nel server
+            alterazione del comportamento dinamico delle pagine web ecc</li>
+        <div>hw</div>
+        <li><b>Spectre</b> vulnerabilità hw nell'implementazione della predizione delle diramazioni nei moderni
+            microprocessori con esecuzione speculativa, che consente ai processi dannosi di accedere al contenuto della
+            memoria mappata di altri programmi. In caso di un branch, per ottenere maggiori prestazioni, la CPU
+            precarica codice e dati in cache eseguendo il codice di entrambi i rami fino a che non
+            è chiaro quale venga scelto. Tuttavia anche quando viene scelto i dati dell'altro ramo rimangono in cache e
+            possono essere letti con tecniche particolari</li>
+        <li><b>Meltdown</b>(crollo) vulnerabilità hw che colpisce microprocessori intel e arm e permette a programmi e
+            potenziali attaccanti di accedere ad aree protette di memoria di un computer. All'interno della CPU non
+            vengono applicati i criteri di separazione imposta da kernel space e user space </li>
+        <li><b>Buffer overflow</b> condizione di errore che si verifica a runtime quando in un buffer di una certa
+            dimensione vengono scritti dati di dimensione maggiore. Quando questo accade viene sovrascritta parte dei
+            dati adiacenti al buffer, con effetti differenti in base di dove si trovi il buffer. Quando il buffer si
+            trova nello stack di memoria, si parla di <b>stack overflow</b> in questo caso tra i dati a poter essere
+            sovrascritti c'è anche il return address di una funzione. Questo potrebbe essere vittima del cracker e
+            modificato per farlo puntare ad un'area di memoria in cui è presente del codice malevolo , oppure ad una
+            sezione di memoria non accessibie, sollevando un'eccezione che, se non gestita, potrebbe far crashare il
+            programma minando
+            la disponibilità di un servizio (DOS). Per rilevare la presenza di stackoverflow è possibile usare dei
+            "canarini" ovvero porre sullo stack un dato di riferimento che se modificato viene rilevato e gestito.Questo
+            meccanismo di protezione non è fornito nè dall'hw nè dal sw ma ottenuto grazie alla collaborazione tra
+            compilatore e libreria. N.B Buffer overflow e stackoverflow si usano per dirottare il flusso di esecuzione
+            di un binario, se si conosce bene l'architettura su cui viene messo in esecizione </li>
+        <li><b>Shell coding</b> rappresenta una tecnica per sfruttare gli stack overflow . Tramite gli stack overflow
+            viene iniettato del codice malevole e un indirizzo di ritorno che punta a questo. Per aumentare la
+            probabilità di successo e quindi di aver scelto un indirizzo valido, si può usare una "NOP sled"; essa non è
+            altro che una lunga sequenza di zero binari che fanno "scivolare" l'IP(instruction pointer) verso
+            l'indirizzo da cui comincia il codice maligno, di conseguenza è sufficiente che l'indirizzo di ritorno punti
+            su una qualsiasi NOP . L'obiettivo comune di questo tipo di attacchi è quello di aprire una shell, con
+            privilegi di root, tramite cui l'attaccante possa avere accesso al sistema.
+            Una prima contromisura è l'ASLR, essa prevede che l'indirizzo logico di partenza dei segmenti sia casuale,
+            pertanto l'attaccante non ha modo di trovare un indirizzo plausibile a cui puntare ed in cui inserire codice
+            maligno. In alternativa si può far affidamento sugli stack non eseguibili (funzionalità fornita dall'hw ma
+            che deve essere supportata dal SO). Una evoluzione consiste nella tecnologia W^X che consiste nel marcare
+            ogni pagina o come eseguibile o come scrivibile
+        </li>
+        <li><b>Rootkit</b> sistema sw in grado di nascondere la compromissione di un sistema. Può essere implementata a
+            livello di applicazione, ad esempio tramite trojan o utility di sistema munite di backdoor , a livello
+            kernel, tramite moduli o driver maligni che consentano di controllare la macchina attaccata, oppure a
+            livello di libreria, tramite sostituzione di librerie ufficiali con altre manomesse (con comportamento dei
+            comandi diverso dal normale : top , ls ecc).
+            In generale i rootkit sono molto difficili da rilevare proprio perchè il loro obiettivo è quello di
+            mascherare la loro presenza modificando gli stessi strumenti di rilevazione. Si può optare per una ricerca
+            euristica tipica antivirus, oppure tramite verifica di dischi tramite un sistema integro e sicuro </li>
+    </ul>
+    </p>
+    <h3 style="color: coral">2.6 Monitoraggio delle risorse e rilevazone degli attacchi </h3>
+    <div><b>Conoscere i propri punti deboli</b></div>
+    <p>Per identificare i propri prunti deboli è utile conoscere la tipologie e le vulnerabilità che conosco e non
+        conosco. Le vulnerabilità conosciute vengono pubblicate secondo il principio di <b>RESPONSIBLE
+            DISCLOSURE-divulgazione responsabile</b>:
+    <ul>
+        <li>Ci si può iscrivere ad una mail list (human readble) o database (machine readble: programmi) dove vengono
+            spiegate e come difendersi</li>
+        <li>A livello aziendale/organizzazioni : CSIRT . Se un team di un'azienda nota una nuova vulnerabilità non nota
+            può indicare come difendersi</li>
+        <li>A livello nazionale : CERT ( per evitare gravi danni nazionali ) Stabiliscono programmi e procedure di
+            reazione agli attacchi .Sono gestiti a livelli nazionali e coordinati da FIRST per la cooperazione tra più
+            Paesi </li>
+    </ul>
+    Mettersi nei panni dell'attaccante e testare i propri sistemi con i test di vulnerabilità documentati nei DB: es.
+    openVAS (Open Vulnerability Assessment System) è un sistema che verifica se un determinato servizio è vulnerabile,
+    aggiornato quotidianamente.
+    <h4 style="color: blue;">2.6.1 Sistemi di monitoraggio</h4>
+    <ol type="A">
+        <li><b>IDS</b> Intrusion Detection System : sistema in grado di rilevare tentativi di attacco , signature based
+            riconosce attacchi noti - anomaly detection riconosce deviazioni dall'uso standard</li>
+        <li><b>IPS</b> Intrusion Prevention System : sistema simile a IDS ma con retroazione, la minaccia viene bloccata
+            , svantaggi se la minaccia è un falso positivo potrei scartare traffico lecito</li>
+        <li><b>SIEM</b> Security Information System : sistemi usati in ambito aziendale: raccolgono eventi che accadono,
+            li analizzano e forniscono soluzioni</li>
+    </ol>
+    Uno dei parametri di qualità di questi sistemi è il numero di falsi positivi e falsi negativi
+    <div><b>Falsi positivi:</b> segnalazione di attacco ma dovuta ad evento innocuo</div>
+    <div><b>Falsi negativi:</b> attacco reale che non genera segnalazione</div>
+    </p>
+    <h3 style="color: blueviolet;">2.6.1.1 IDS</h4>
+        <div><b>Classificazione su come lavorano</b> </div>
+        <p>
+        <div> <b>signature based</b> : controllano cosa succede e se rilevano sequenze di codice uguali ad attacchi noti
+            avvisano: PRO pochi falsi positivi , CONTRO falsi negativi possibili </div>
+        <div><b> anomaly detection</b> : si determina quale deve essere l'uso corretto e l'avviso scatta quando ci si
+            discosta da questo : PRO un attacco non noto potrebbe essere fermato, CONTRO azioni innocue possono essere
+            bloccate </div>
+        <div><b>Classificazione su dove lavorano</b> </div>
+        <div> <b>HIDS </b> Host based IDS : interagiscono con il SO : monitorano il filesystem esaminano in tempo reale
+            i file di log e verificano dati e metadati dei file</div>
+        <div>VANTAGGI :Risiedono sulla macchina da proteggere quindi sfruttano i sistemi già esistenti (Economico), se
+            devono proteggere più macchine il carico computazionale è distribuito, interagendo sulla macchina capiscono
+            se il pacchetto di uscita è benevolo o meno (ha senso che Word invii un pacchetto verso B:porta 80 , mica
+            tanto)
+            i NIDS essendo basati sul traffico non riescono a capirlo. SVANTAGGI: Se un evento/pacchetto non lascia
+            traccia sul filesystem è invisibile, richiede l'istallazione di un agent sulla macchina (nei sistemi
+            embedded,quali telecamere ecc, non posso farlo),
+            se la macchina è compromessa vengono aggirati. Esempi di HIDS : la rilevazione è tipicamente svolta per
+            mezzo di un integrity checker. Idea di base: se ho un sistema pulito , ne faccio uno snapshot (istantanea
+            del suo stato) e dopo un certo tempo verifico il filesystem con lo snapshot. HIDS più diffusi: TRIPWIRE,
+            AIDE( posso definire vari check per ogni file e controlla permessi inode ecc), AFICK (simile ad AIDE ma con
+            meno check supportati). NB si effettuano delle impronte dei file , e per ogni file ho una scheda descrittiva
+            che contiene l'hash del contenuto e metadati </div>
+        <div> <b>NIDS </b> Network based IDS : usano i dati intercettati sulla rete. Esempi snort suricata e bro</div>
+        <div>VANTAGGI Visibilità di tutto il traffico entrante/uscente (limite dei HIDS), richiede solo un punto di
+            installazione nelle reti semplici, al massimo più
+            di uno in quelle complesse, un malfunzionamento non incide sugli endpoint l'host continua a funzionare
+        </div>
+        <div>CONTRO Maggior numero di falsi positivi o falsi negativi, processi leggittimi possono generare traffico
+            anomalo, quello che si fa è stabilire una soglia di tolleranza, se troppo bassa (ma da preferire)tanti falsi
+            positivi se troppo alta tanti falsi negativi. Più soggetto a sovraccarico perchè
+            unico punto , spesso vengono inviati pacchetti frammentati, che cerca di ricostruire, per farlo collassare.
+            Il traffico cifrato non può essere esaminato
+        </div>
+        </p>
+        <div><b>PORTSCANNER</b>. Un portscanner è un programma in grado di rilevare quali servizi di rete sono attivi su
+            una macchina o in una intera rete, eseguendo una scansione sulle porte per identificare
+            quali di esse sono correttamente utilizzate da un qualunque demone di sistema per fornire servizi.
+            Generalmente si tratta di uno strumento importante per verificare in maniera effettiva
+            la propria rete, dato che in presenza di una macchina compromessa non si può avere nessuna fiducia nei
+            programmi diagnostici eseguiti sulla macchina perchè potrebbero essere stati manomessi. Infatti in caso di
+            violazione di una macchina uno dei primi passi
+            effettuati dall'attaccante è quello di predisporre una backdoor e modificare i programmi di rilevazione
+            installando un rootkit. Per questo motivo è importante effettuare il controllo delle porte aperte di un
+            sistema o di una rete da una macchina sicura. Un esempio di portscanner è nmap</div>
+        <div><b>SNIFFER</b>. Uno sniffer è un programma usato per leggere ed analizzare il traffico su di una rete che
+            arriva su una macchina. Se installato su di una macchina specifico è in grado di ascoltare il traffico e
+            vedere le caratteristiche. Esempi di sniffer sono tcpdump e wireshark</div>
+        <h4 style="color: blue;">2.6.2 Log di Sistema </h4>
+        <p>
+            Sono i migliori amici del sistemista,sono indispensabili per la diagnostica e in generale per rilevare
+            attività malevole o sospette. La sicurezza dei
+            log stessi va garantita, ad esempio tramite replicazione o tramite l'uso di un integrity checker. Inoltre è
+            possibile inviare i messaggi di log ad un server sicuro
+            (che però va protetto in quanto diventa un bersaglio appetibile) in modo da poterli gestire in modo
+            centralizzato. Tuttavia non è sufficiente mantenere un elenco di eventi, occorre analizzarlo
+            (sw diffusi sono logwatch e swatch) in modo da estrarre correlazioni tra eventi e relazioni temporali.
+            In Linux si utilizzano come formato di logging i file di testo , ma essendoci molti tipi e distro non c'è un
+            vero e proprio standard di formato, ogni sistema di logging decide come
+            memorizzare gli eventi rilevati: elemento comune è il timestamp . Su linux abbiamo:
+        <ul>
+            <li><b>BSD-Syslog</b> obsoleto ereditato da BSD era dotato di un demone separato per il logging dei messaggi
+                del
+                kernel klogd. Di base ogni messaggio ricevuto viene serializzato( visti in modo sequenziale) ed
+                associato ad un timestamp prima di essere scritto nel file di log.
+                Ogni messaggio viene etichettato da una coppia che ne identifica l'origine e la priorità
+                (facility-priority), in modo da comprendere quale sia la destinazione a cui assegnare il messaggio. Le
+                configurazioni sono mantenute
+                all'interno del file /etc/syslog.conf, in cui ogni riga corrisponde ad una regola </li>
+            <li><b>Rsyslog</b> rappresenta l'evoluzione di syslog , ha una struttura modulare in modo da caricare solo
+                le funzioni necessarie. Permette l'utilizzo di modalità di output avanzate per definire le destinazioni
+                in maniera
+                più flessibile, ad esempio distinguendo i messaggi sulla base di alcune proprietà o espressioni. Le
+                configurazioni sono contenute nel file /etc/rsyslog.conf (e nei file contenuti nella cartella
+                /etc/rsyslog.d )in cui ogni riga corrisponde ad una regola</li>
+            <li><b>Syslog-ng</b> next generation, permette ancora più flessibilità e profondità di analisi del contenuto
+                dei messaggi. L'input è compatibile con i log di syslog e journald. L'output può essere ridiretto anche
+                verso varie tipologie di DB</li>
+            <li>N.B integrato in systemd, abbiamo un sistema di logging ti tipo journal (posso garantire l'integrità di
+                ciò che viene scritto, non perdo nulla in caso di malfunzionamento, non lo dichiaro vero fin quando non
+                sono sicuro che sia stato scritto) </li>
+        </ul>
+        </p>
+        <h4 style="color: blue;">2.6.3 SIEM</h4>
+        <p>
+            Rappresentano tutti quegli strumenti, politiche e procedure per la gestione integrata delle fonti di
+            informazione e degli incidenti. I SIEM
+            integrano le funzionalità offerte dai SEM (monitoraggio e gestione realtime degli eventi che accadono
+            all'interno di una rete) e dei SIM ( automatizzazione del processo di raccolta
+            e gestione dei log non realtime) al fine di poter combinare all'analisi svolta real time la possibilità di
+            fornire report inerenti ai dati raccolti. Tipicamente sono usati per rilevare malware, monitorare le
+            connessioni,
+            osservare violazioni delle politiche interne di un sistema e tentativi di attacco.
+            Esempio notevole è OSSEC open source. E' di base un sistema HIDS costituito da un integrity checker , ma è
+            anche un IPS quindi non si limita ad avvisare, è in grado di rilevare rootkit. E' in grado di
+            funzionare sia in modalità locale sia distributia (i client ricevono la configurazione dal server ed inviano
+            al server i log su un canale cifrato ).
+            In generale vengono definiti degli item(traffico, consumo ram, ecc) se superano una certa soglia scattano
+            dei
+            TRIGGER ai quali segue un action (manda una mail, autodistruggiti ecc)
+        </p>
+
+        <h3 style="color: coral">2.7 Installazione del Software </h3>
+        <p>
+            Il ciclo di vita del software installato su di un computer comprende installazione,aggiornamento e
+            disinstallazione; in ognuna di queste fasi
+            possono presentarsi problematiche riguardanti il soddisfacimento di prerequisti hw/sw (ogni sw deve essere
+            compatibile con l'architettura x86 x64 (cisc) arm (risk), essendo complesse vi sono librerie e componenti
+            ausiliari quindi dipendenze ) e la configurazione (la maggior parte dei servizi deve essere configurato per
+            l'uso che intendiamo farne)
+            <b>In dettaglio</b>
+        <ul>
+            <li><b>INSTALLAZIONE</b> L'installazione può essere <b>Manuale-Automatizzata </b>
+
+            <li>Manuale: da binari (programmi eseguibili dal nostro sistema) da sorgenti (programmi scritti in
+                un linguaggio di alto livello che verranno poi compilati)
+            </li>
+            <ul>
+                <li>Da binari: semplice copia in una cartella nel path (per essere poi invocati da shell). Occorre
+                    verificare manualmente la compatibilità con l'architettura ,occorre verificare il
+                    soddisfacimento delle dipendenze altrimenti scaricarle</li>
+                <li>Da sorgenti: necessità di compilazione, indipendenza dall'architettura (se "scritto" bene, se
+                    rispetto lo standard POSIX sarà portabile sui sistemi UNIX), maggiore flessibilità nel
+                    soddisfacimento delle dipendenze. Limiti: posso verificare i sorgenti(ma fidarsi di una firma su
+                    un archivio non è diverso da verificare la firma su un binario), più
+                    difficile la manutenzione (se devo aggiornare un componente che aveva dipendenze ed era lui
+                    stesso sorgente di dipendenze allora crolla il mio grado delle dipendenze), richiede molti
+                    componenti ausiliarie librerie ecc, roba che un attaccante può usare per attaccare </li>
+            </ul>
+            </li>
+            <li>Automatizzata tramite l'ausilio di un package manager, un software che si fa carico delle verifiche
+                necessarie all'installazione come ad esempio controllo delle dipendenze </li>
+            <li>Le distribuzioni di Linux organizzano il software in pacchetti e dispongono di un package mangare per la
+                loro gestione. Un pacchetto si presenta sotto forma di singolo file che contiene in forma compatta
+                l'insieme di sw precompilato, di criteri per la verifica delle compatibilità/prerequisiti e di procedure
+                di pre/post-installazione.
+                La garanzia delle compatibilità con un determinato sistema può essere data solo a patto di vincolare con
+                precisione alcuni parametri, come l'architettura del sistema, la versione della distro, la versione del
+                sw contenuto nel pacchetto. Tra i pacchetti disponibili per una distro ve ne sono alcuni adibiti allo
+                sviluppo di software (il cui nome generalmente termina con "-dev")
+            </li>
+        </ul>
+        </p>
+        <li><b>AGGIORNAMENTO</b> Quando si aggiorna un pacchetto presente nel sistema occorre porre attenzione ai
+            potenziali problemi derivanti da </li>
+        <ul>
+            <li>prerequisiti/dipendenze: potenzialmente il grado delle dipendenze è complesso ed articolato, ma perchè
+                il sw funzioni correttamente tutte le dipendenze
+                devono essere soddifatte correttamente. In più durante l'aggiornamento potrebbero venir modificate le
+                interfacce esposte dal programma,causando malfunzionamenti in altri sw;
+                di conseguenza tutti gli aggiornamenti vanno testati per controllare che possano coesistere con il
+                software restante. In questo ultimo caso potrebbe essere necessario far coesistere due versioni
+                differenti dello
+                stesso pacchetto (principale/test) e quindi gestire manualmente i binding delle librerie dinamiche, come
+                fare? macchine virtuali
+            </li>
+            <li>configurazione potenzialmente la nuova versione del sw comporta modifiche ai file di configurazione</li>
+        </ul>
+        <li><b>DISINSTALLAZIONE</b> Presenta gli stessi problemi dell'aggiornamenteo in termini di dipendenze .Pertanto
+            conviene sfruttare le funzionalità
+            offerte dal package manager circa la gestione del grafo delle dipendenze </li>
+        <h3 style="color: coral">2.7.1 Virtual Environment </h3>
+        <p>Per ottenere isolamento di sw ,per aggiornare e testare, è possibile utilizzare macchine virtuali al fine di
+            ottenere sistemi preconfigurati che isolino i diversi ambienti di esecuzione, tuttavia queste sono
+            eccessivamente
+            pesanti per il servizio che forniscono( impongono l'installazione di un intero SO, replicando utilità e
+            librerie, limitando l'accesso alle risorse). Una soluzione alternativa consiste nell'isolare l'ambiente
+            di esecuzione di certi processi facendo sì che condividano però il SO. In questo caso l'isolamento non è
+            completo e non possono essere eseguite applicazioni incompatibili con il sistema, ma l'accesso alle risorse
+            hw è diretto e le risorse condivise non sono replicate. Il kernel Linux fornisce tre funzionalità:
+        <ul>
+            <li><b>Control groups (Cgroups)</b> permettono di controllare la quantità di risorse che un processo può
+                consumare e l'accesso ai device </li>
+            <li><b>Namespace</b> permettono di mostrare ai vari processi istanze logiche differenti della stessa risorsa
+                reale. Per ottenere questo risultato ogni processo vive all'interno di un namespace( ha un suo spazio
+                riservato)</li>
+            <li><b>Union-capable filesystem</b> filesystem Linux (e BSD) permette di simulare l'unione di più filesystem
+                esistenti </li>
+
+        </ul>
+
+        Utilizzando il partizionamento delle risorse si possono definire i container, che permettono di definire in modo
+        coerente sia cgroup che namespace specificando come le risorse reali vadano esposte all'interno del sistema.
+        La gestione dei container è semplificata da strumenti come LXC , Docker ecc </p>
+
+
+        <h3 style="color: coral">2.8 Gestione dei servizi e dei processi </h3>
+        <p>Anche dopo un'installazione minimale sul sistema sono attive decine e decine di processi, anche se tutti
+            fossero necessari è utile, conoscerne l'origine e comprendere quali terminare
+            per guadagnare risorse ,oltrechè minimizzare fonti di attacco. Ci sono tre principali fonti di processi
+            (oltre agli utenti):
+        <ul>
+            <li>Pianificatori periodici e sporadici</li>
+            <li>Demoni di gestione degli eventi</li>
+            <li>Procedure di avvio del sistema</li>
+        </ul>
+        <div><b>Processi periodici</b> sono in generale lanciati dai demoni <em>cron</em> e <em>at </em></div>
+        <div><b>Demoni per la gestione degli eventi </b> <em>D-Bus</em> è un'architettura di IPC (Inter Process
+            Comunication) nata per uniformare
+            la comunicazione tra gli elementi delle interfacce desktop(collegare evento hw ,inserimento chiavetta, ad
+            apertura finestra ad esempio ) ma che fornisce anche sistemi per facilitare la gestione del ciclo di vita
+            dei processi. I file di configurazione
+            sono contenuti all'interno di /etc/dbus-1/</div>
+        <div><b>UDev</b>, ora parte di systemd, è un device manager il cui scopo primario è quello di gestire sia gli
+            elementi contenuti all'interno
+            della directory /dev sia quello di gestire gli eventi scatenati dall'inserimento o rimozione di un
+            dispositivo. Udev carica i moduli kernel necessari parallelamente per consentire performance migliori,
+            tuttavia
+            questo significa che i moduli non sono caricati sempre nello stesso ordine ad ogni boot, causando potenziali
+            cambiamenti di nome di un dispositivo tra due accensioni diverse del sistema. I file di configurazione sono
+            contenuti all'interno di /etc/udev/rules.d
+            Es: 70-persistent-net.values -> assegna a quella scheda di rete il nome eth0
+        </div>
+        </p>
+        <div><b>Procedure di avvio del sistema</b> <em>init </em> è il primo processo lanciato dal kernel. Esso è
+            deputato alla gestione dei runlevel (ovvero stati di funzionamento del sistema definiti dal sottoinsieme di
+            processi attivi ), orchestra la sequenza corretta di eventi per raggiungere un certo runlevel e lo
+            spegnimento coordinato
+            del sistema. Sono presenti tre varianti principali: </div>
+        <ul>
+            <li><b>sysVinit (storico e utile nei sistemi con scarsa potenza computazionale, leggero ma sequenziale):
+                </b>contenuto in /sbin/init è l'originale demone di avvio di SystemV Unix. All'interno del file di
+                configurazione /etc/initab sono contenuuti i dati necessari a definire quali processi debbano
+                girare in un dato runlevel (script contenuti all'interno delle directory /etc/rcN.d, con N
+                corrispondente ai vari runlevel) e quali debbano essere riavviati in caso di arresto. Ogni volta che il
+                sistema entra nel runlevel X vengono eseguiti tutti i processi il cui nome
+                inizia per 'S' e terminati tutti quelli il cui nome inizia per 'K' all'interno della directory
+                /etc/rcX.d </li>
+            <li><b>Upstart (2006-2014, adottato per poco tempo perchè poco documentato)</b>: prodotto da Canonical,
+                costituisce un rimpiazzo per init basato sulla logica ad eventi. Permette l'inizializzazione dei
+                sottosistemi parallela non bloccante e la gestione omogenea di tutti gli eventi asincroni. Ogni
+                avvenimento genera un evento, in questo modo si avvia praticamente automaticamente. La directory
+                /etc/init contiene un file per definire ogni attività e il demone init continua ad orchestrare il
+                sistema
+            </li>
+            <li><b>Systemd (ispirato da RedHat , ora molto diffuso)</b> è un gestore di sistema e di servizi per Linux
+                con
+                notevole capacità di parallelizzazione. Fa uso di socket e di <em>D-Bus</em> per l'avvio dei demoni,
+                offre
+                l'avvio su richiesta dei demoni e tiene traccia dei processi tramite <em>Cgroups</em>. Permette il
+                logging
+                precoce e la specifica di dipendenze tra i servizi. Si propone di sostituire vari demoni di sistema com
+                <em>init,udev,inetd,syslog</em> fornendo una soluzione unificata per la gestione di tutti questi
+                servizi.
+                Permette
+                di definire varie <em>control unit </em> i cui nomi seguono la convenzione <em>name.type</em>, dove type
+                può
+                assumere vari valori tra <em>Service</em>(per il controllo ed il monitoraggio dei
+                demoni),<em>Socket</em>(per l'attivazione di canali IPC) <em>Target</em> (per definire gruppi di unit,
+                rimpiazza il concetto di runlevel) <em>Device</em>(permette di creare punti di accesso ai dispositivi
+                creati
+                dal kernel in seguito ad interazioni con l'hardware) ecc.
+                <em>Systemd </em>rimpiazza il concetto di runlevel con il concetto di target, per raggruppare delle
+                unità
+                sulla base delle dipendenze e per fornire nomi standardizzati per i punti di sincronizzazione. Questo fa
+                sì
+                che la gestione delle dipendenze diventi molto più robusta e automatizzata; Anche se viola il principio
+                di
+                Unix ovvero fare poche cose ma bene, alcune cose sono legate tra loro e ha senso farle fare da un
+                processo
+                composto da tanti moduli.
+                <div> Es: controllo a runtime dei servizi </div>
+                <div><b>systemctl {start|stop|status|restart|reload} servicename </b></div>
+                <div>Configurazione persistente dei servizi al boot</div>
+                <div><b>systemctl {enable|disable|mask |umask} servicename </b></div>
+                <div>disable (lascia disponibile la possibilità di usare manualmente start) , mask(impedisce la
+                    successiva start)</div>
+            </li>
+
+        </ul>
+        <h3 style="color: coral">2.9 Sicurezza delle reti </h3>
+        <p>Sono possibili vari tipi di attacchi che sfruttano le debolezze dei protocolli di rete (sia a livello
+            applicativo,che di rete)
+        </p>
+        <ul>
+            <li><b>Hijacking</b> dirottamento della connessione, fancendola passare da apparati dell'attaccante </li>
+            <li><b>Sfruttando i protocolli applicativi</b> direttamente (Es. HTTP attraverso manipolazione del browser)
+                attraverso protocolli ausiliari (Es.DNS)</li>
+            <li><b>Sfruttando falle protocollo Ip </b></li>
+        </ul>
+
+        <p><b>DNS spoofing</b> (Falsificazione della risposta DNS) Quando un utente effettua una query DNS, l'attaccante
+            la cattura e manda alla vittima una risposta fasulla, differente
+            da quella che avrebbe fornito il DNS. Questo attacco può anche essere portato a termine tramite
+            <em>pharming</em> quando la vittima visita un sito compromesso uno script esegue una riconfigurazione
+            del DNS locale del router (non accessibile direttamente) redirigendo tutte le successive query DNS verso un
+            name server scelto dall'attaccante.
+            Questo tipo di attacco è molto semplice ma richiede l'accesso ad un name server e la possibilità di
+            modificare direttamente
+            alcuni record. L'impatto di questa categoria di attacchi può essere mitigato tramite l'uso di HTTPS.
+            Questo attacco avviene spesso tramite phishing , invio di email fraudolente che portano su pagine web
+            compromesse.
+            Inizialmente, quando si diffuse la mail elettronica, molti MUA (Mail User Agent, programmi per leggere la
+            posta) per rendere
+            la user experience migliore mostravano delle anteprime delle pagine, e l'utente a sua insaputa subiva
+            l'atacco, gli script venivano eseguiti da soli
+        </p>
+        <h4 style="color: blue;">2.9.1 Sicurezza a livello applicativo HTTPS</h4>
+        <p>HTTPS è un protocollo per la comunicazione sicura attraverso reti internet, esso consiste nell'utilizzo del
+            protocollo HTTP all'interno di una connessione
+            cifrata da TLS (o dal predecessore SSL) fornendo <em>autenticazione </em> dei siti web visitati,
+            <em>protezione</em> della privacy durante la comunicazione ed <em>dei dati</em>.
+            Questo protocollo garantisce una protezione accettabile da attacchi della tipologia man in the middle.
+            Grazie a TLS vengono cifrati tutti i dati
+            contenuti nei messaggi HTTP,quali URL, parametri della query, cookies, header della connessione.
+            Si basa su un'autenticazione sfida-risposta. Ogni server che vuole essere riconosciuto dal resto del mondo,
+            ha a
+            bordo una chiave privata e il browser client, contiene la sua chiave pubblica.
+            Se il server è autentico, l'utente genera con la chiave pubblica una sfida(genera un numero e lo cifra) il
+            server
+            deve essere in grado di decifrarlo con la sua chiave provata e lo restituisce.PRO se la sfida viene
+            intercettata non può essere risolta, CONTRO la chiave privata deve
+            essere custodita e autentica. Per questo qualcuno deve verificare le chiavi
+        </p>
+        <p><b>Certification Auhority / Certificati digitali </b> Una certification authority è un soggetto terzo fidato
+            abilitato ad emettere un certificato digitale, ovvero
+            un documento elettronico che attesti l'associazione univoca tra una chiave pubblica e l'identità di un
+            soggetto.
+            L'infrastruttura PKI (Public Key Infrastructure) è costituita da varie CA organizzate gerarchicamente al cui
+            vertice si trova una
+            CA-root, il cui certificato è solitamente auto-firmato, che certifica le sub-CA. Una CA, ha,tra
+            i suoi compiti,il rilascio dei certificati, previa identificazione e verifica del richiedente, la
+            manutenzione del registro delle chiavi, la revoca/sospensione dei certificati in caso
+            di abusi/falsificazioni, la pubblicazione di liste sempre aggiornate di certificati.
+            All'interno di un certificato digitale sono contenute varie informazioni tra cui la chiave pubblica del
+            proprietario del certificato, l'identità del proprietario. Esse sono digitalmente firmate da parte della CA
+            per garantire
+            autenticità e integrità. Il formato più comune per i certificati è definito dallo standard X.509, che però,
+            essendo molto generale , ha la necessità di essere
+            ulteriormente specificato per i vari casi d'uso</p>
+
+        <p><b>SSL/TLS</b> il primo con alcune vulnerabilità , il secondo suo successore. Qualunque protocollo
+            applicativo che può viaggiare su TCP, può essere incpsulato di questi protocolli .Sono protocolli
+            crittografici
+            progettati per fornire sicurezza delle comunicazioni attraverso reti internet, in paricolare per fornire
+            caratteristiche di confidenzialità ed integrità dei dati.
+            La connessione è privata grazie all'uso della crittografia simmetrica (stessa chiave per
+            cifrare/decifrare), chiave scambiata durante l'handshake iniziale
+            (a sua volta protetto da crittografia asimmmetrica) viene garantita l'autenticazione delle parti
+            comunicanti.
+            L'handshake è composto da più fasi: </p>
+        <ul>
+            <li>Negoziazione: vengono concordate le caratteristiche della comunicazione, come protocollo di
+                comunicazione e crittografico</li>
+            <li>Scambio dei certificati </li>
+            <li>Inizializzazione della connessione cifrata </li>
+            A causa di alcune vulnerabilità, sia a livello di protocollo sia di implementazione , SSL è stato sostituito
+            da TLS
+        </ul>
+        <p>Alcuni tipi di attacchi che permettono di violare la sicurezza di TLS: homograph attack
+        <ul>
+            <li>Occultamento dell'url, l'url è molto simile per via dell'uso di alcuni caratteri che vengono poi
+                rappresentati in molto molto simile ad altri</li>
+            <li>Occultamento della barra degli indirizzi, era possibile inserire un'immagine sopra ad un'area esterna
+                alla finestra del browser. Tendine cha nascondono la barra degli indirizzi che quindi nascondevano
+                l'indirizzo della pagina malevola</li>
+            <li>Iniezione di CA nel certificate store , se il mio browser contiene certificati falsi , un sito malevolo
+                viene visto come buono </li>
+        </ul>
+        Vulnerabilità di SSL a livello di protocollo:
+        <ul>
+            <li>DROWN (2016) Gravi vulnerabilità note nella vecchia versione di SSL v2 originate dalle restrizioni
+                imposte dal governo USA all'esportazione di chiavi forti con un livello alto di entropia, questo
+                implicava chiavi deboli</li>
+            <li>POODLE (2014) Un attaccante nel mezzo può forzare il downgrade delle connessioni verso SSLv3 che
+                contiene vulnerabilità sfruttabili </li>
+        </ul>
+
+        E' sempre bene usare il protocollo TLS, nella realtà però non avviene sempre perchè la maggior parte dei
+        dispositivi non è aggiornata e quindi supporta protocolli vulnerabili.
+        AWARENESS (CONSAPEVOLEZZA) La maggior parte degli utenti che usa internet è ignara dei problemi di sicurezza
+        informatica. La persona comune messa di fronte alla necessità di fare un'operazione complicata,
+        per poter usare unn servizio, che per lui dovrebbe essere semplice, SBAGLIANDO, fa un casino. Per questo le
+        aziende cedono a queste pratiche scorrette e non impongono regole ferree, es se l'access point non supporta quel
+        protocollo non va bene
+        <h4 style="color: blue;">2.9.2 Sicurezza a livello di rete </h4>
+        Il protocollo IP non può garantire nessuna proprietà di sicurezza per nessuna parte del pacchetto
+        Esistono varianti che conferiscono queste proprietà ma richiedono uno stack modificato.
+        Esempio di attacco dovuto alla mancanza di sicurezza di IP
+        <div><b>IP Hijacking</b> attacco basato sul dirottamento. Si opera in modo tale da informare internet che la
+            rotta per una data subnet passa attraverso la propria rete . Questo è possibile perchè chiunque teoricamente
+            può diffondere informazioni
+            circa la viabilità delle rotte in internet e permette di realizzare vari tipi di attacco più o meno dannosi
+            (Dos, man in the middle, spamma e fuggi). Passa attraverso il proprio AS (Authority System ,isola nella
+            rete, entità
+            organizzativa proprietaria di un blocco di ip address che attraverso i protocolli BGP (con cui comunicano i
+            router, di frontiera), informa border gateway che si può passare da loro per una certa destinazione.
+            Usi differenti: non malevolo, per gioco; DOS attivo o passivo; impersonare un bersaglio Man in the middle
+        </div>
+        </p>
+        <div>Curiosità: Nel 2008 Youtube venne dirottato, Pakistan Telecom decide di bloccare Youtube per via dei suoi
+            contenuti (aggiunge quindi un regola che scarta i pacchetti diretti alla rete di Youtube, ma anzichè
+            limitarlo al caso locale questa regola si è propagata a tutto internet, causando un DOS, soluzione fare di
+            una rete /24 due sottoreti /25 , nelle tabelle di route si considerano le netmask con più uni, infatti
+            0.0.0.0/0 fa match con tutte le destinazioni quindi è considerata per ultima,
+            in questo modo le due rotte /25 hanno il sopravvento su quella /24)
+            IANA (ente no profit che assegna nomi di dominio e ip ,l'ente che da i numeri , opera delegando 5 macro
+            aree: RIPE per l'Europa </div>
+        <p><b>IPsec</b> IPSec non è un protocollo singolo, ma un insieme di algoritmi per la sicurezza ed un framework
+            per la negoziazione di algoritmi che permettono
+            di ottenere autenticazione e crittografia direttamente a livello di rete. IPSec ha varie applicazioni tra
+            cui l'interconnessione sicura di reti remote attraverso internet e l'accesso sicuro di client ad una rete
+            privata.
+            Rispetto ad altre soluzioni, esso presenta il vantaggio di essere trasparente alle applicazioni (non devo
+            modificare le applicazioni), tuttavia lo stack di IPSec è differente da quello standard di TCP/IP, la
+            macchina va configurata per questo stack specifico.
+            IpSec è basato su tre componenti:
+        <ul>
+            <li><b>AH </b>(Authentication Header) fornisce un servizio di autenticazione dei pacchetti</li>
+            <li><b>ESP </b>(Encapsulating Security Protocol) fornisce un servizio di autenticazione e cifratura dei
+                pacchetti</li>
+            <li><b>IKE </b> (Internet Key Exchange) fornisce un servizio di negoziazione dei parametri necessari al
+                funzionamente dei precedenti componenti</li>
+        </ul>
+        Tramite IPSec posso creare un layout di rete chiamato VPN (Virtual Private Network) lavorando sulla struttura
+        dei pacchetti IP. Oggi si pensa che questo sia un sistema per navigare in modo anonimo,
+        ma è nato con un concetto diverso. L'idea è io sto usando una rete pubblica (non ho controllo del routing e
+        della
+        correttezza degli apparati: possono esserci i cattivi che analizzano il mio traffico e modificare i pacchetti).
+        Utilizzando
+        questa tecnologia possono innescare una comunicazione tra endpoint della rete che ai miei occhi la fanno vedere
+        come se fosse una rete totalmente privata, ma che è però virtualmente privata, infatti si appoggia su una rete
+        pubblica.
+        L'idea è quella di far parlare reti diverse come se fossero unite da un canale privo di attaccanti, in realtà
+        sto veicolando il traffico nella rete pubblica. Questo si può
+        ottenere in due modi: <b>Modificando il dispositivo endpoint</b> quindi modificando il suo stack di rete in modo
+        tale che produca pacchetti che contengano come payload il payload di IPSec, ma se devo farlo su grande scala
+        devo modificare tutti gli host che voglio far comunicare.
+        Il secondo metodo è <b>modificare l'apparato che connette ad internet (router)</b> lasciando gli end-point
+        uguali, quando il pacchetto arriva al router viene trasformato in un pacchetto IPSec e viceversa.
+        Sono possibili soluzioni ibride. Nel funzionamento di IPSec giocano un ruolo chiave le SA (Security Association)
+        che identificano un canale di comunicazione unidirezionale diretto dal nodo locale verso un altro nodo
+        (destinazione), protocollo usato (AH o ESP), modalità di funzionamento di SA (Transport Mode, Tunnel Mode) ed un
+        SPI (Security Parameter Index) usato per disitinguere i canali aventi stessi estremi e protocolli.
+        Essendo un SA , unidirezionale ne servono almano due per definire un canale bidirezionale. La modalità TRANSPORT
+        prevede la comunicazione diretta tra due stazioni ciascuna delle quali tratta i pacchetti e li spedisce tramite
+        IPSec; la modalità TUNNEL prevede la presenza di almeno un router (il codiddetto SECURITY GATEWAY) che faccia da
+        tramite per le comunicazioni poste nella rete per la quale ascisce da gateway, questa è la modalità
+        tipica delle VPN
+
+        </p>
+        <div><b>AH </b> il protocollo serve soltanto per autenticare i pacchetti generando una firma digitale , vengono
+            esclusi i campi variabili come TTL. </div>
+        <ul>
+            <li> Può essere usato in TRANSPORT MODE aggiungo un pezzo: in questo caso viene inserito tra header e
+                payload l'intestazione di
+                AH che contiene i dati relativi all'autenticazione del pacchetto, mantiene l'header originale perchè
+                serve per trovare la destinazione.
+            </li>
+            <li> Può essere usato in TUNNEL MODE lo incapsulo: in questo caso si crea una nuova intestazione IP che
+                conterrà solamente
+                gli estremi del tunnel e si autentica integralmente il pacchetto (sempre campi variabili esclusi)
+                la nuova intestazione viene posta in testa al nuovo pacchetto seguita da AH, e dal pacchetto originale
+                replicato. Quando verrà ricevuto dal security gateway , lo controlla e se integro ne rimuove
+                l'intestazione usata per la trasmissione, e lo inoltra a destinazione
+            </li>
+            <li>PRO: Garantisce autenticazione e integrità dei pacchetti IP , protegge da replay attacks(intercetto un
+                pacchetto relativo ad un bonifico lo uso più volte, non posso farlo)</li>
+            <li>CONTRO: Non ho la cifrazione e essendo l'autenticazione basata su tutto il pacchetto , quando il nat
+                converte l'ip locale in quello pubblico del internet provider , viene rilevata una violazione di
+                integrità, quindi o lo uso in trasport mode o senza nat </li>
+        </ul>
+        <div><b>ESP</b> con cifratura e con cifratura e autenticazione</div>
+        Qualora si voglia cifrare il contenuto del pacchetto occorre ricorrere all'uso del protocollo ESP
+        <ul>
+            <li>Nella modalità TRANSPORT MODE (istruisco gli host) aggiungo un pezzo: si cifra il payload del pacchetto
+                ip e si inserisce tra header e payload cifrato l'intestazione ESP, l'header non viene cifrato perchè
+                deve raggiungere la destinazione </li>
+            <li>Nella modalità TUNNEL MODE (istruisco il router) lo incpsulo: si genera una nuova intestazione IP ed il
+                pacchetto originale viene cifrato integralmente (inclusi inidirizzi) L'intestazione aggiunta conterrà
+                gli indirizzi dei SECURITY GATEWAY</li>
+            <li>con autenticazione oltre a cifrare autentica nel primo caso il payload nel secondo l'intero pacchetto
+            </li>
+        </ul>
+        </p>
+        <div>Combinazioni di SA</div>
+        <ul>
+            <li>PRO e CONTRO di link-by-link e end-to-end</li>
+            <li> Protezione link-by-link se attivo anche la cifratura (ESP) mi garantisce che payload e header sia
+                cifrato, contro non mi garantisce che l'ultimo tratto da SECURITY GATEWAY a host sia sicuro, se non uso
+                TLS sono in chiaro su SG </li>
+            <li> Protezione end-to-end quello che transita è cifrato ma posso fare analisi del traffico, c'è un browser
+                che parla con un server, con ESP non succede, inoltre mi garantisce che il responsabile unico e ultimo
+                della cifratura/decifratura è chi li deve usare </li>
+        </ul>
+        <div>Considerazionni finali</div>
+        <p>
+        <ul>
+            <li>SSL/TLS è specifica del dominio applicativo (va integrato nelle apllicazioni) è semplice e standard
+                (basta configurare il browser inserendo certificati)</li>
+            <li>IPSec è generale e trasparente alle applicazioni (richiede stack modificato) è complesso </li>
+            <li>Soluzioni ibride: si sono affermate, usano varianti di TLS per il trasporto dei pacchetti IP analogo a
+                TUNNEL MODE(istruisco il router) di IPSec implementati in user space , indipendentemente dal SO .
+                Esempio tool OpenVpn </li>
+        </ul>
+        Come funziona OpenVpn ? Un'applicazione che gira in user-space (demone) partendo come root può invocare
+        systemcall che gli permettono di creare tun0 un'interfaccia di rete virtuale a cui viene associato un indirizzo
+        ip. Il sistema è dotato chiaramente di un'interfaccia di rete vera (eth0). Ma grazie
+        a quella virtuale posso inserire nella route table una entry che indica che bisogna passare prima da tun0 e sarà
+        lei a modificare il pacchetto. Sulla macchina destinatario ci sarà un demone
+        OpenVpn che riceve il pacchetto modificato. Vantaggio: il pacchetto giunge al processo in userpace che decide
+        come cifrare e autenticare e nel caso sia un tunnel, viene incapsulato e inviato, discorso duale alla
+        destinazione.
+        A differenzza di IPSec non ho bisogno di mettere in kernel space tutta la logica di come cifro e autentico, qui
+        viene fatto da un processo in user-space e quindi facile da portare su SO diversi
+        NORDVPN usa OpenVpn per collegare l'host al server proprietario
+        </p>
+
+        <h4 style="color: blue;">2.9.4 Firewall</h4>
+        <p>
+            Abbiamo visto gli strumenti da adottare per la sicurezza a livello IP e applicativo dello stack TCP/IP,
+            rispettivamente con IPsec e TLS
+            Ora vedremo non tanto come proteggere il pacchetto, ma l'infrastruttura.
+            La definizione di FIREWALL è DIFESE PERIMETRALE (Muro tagliafuoco), un dispositivo per limitare la
+            propagazione di un fenomeno
+            indesiderato, un po' come succede per un incendio.
+            Il Firewall divide "dentro" da "fuori" : quello che avviene dentro non è visibile nè controllabile.
+            Si passa solo dalla porta: politiche centralizzate di controllo dell'accesso. La port serve sia per entrare
+            ma anche per uscire:
+        <ul>
+            <li><strong>INGRESS FILTERING</strong> per impedire l'accesso a malintenzionati</li>
+            <li><strong>EGRESS FILTERING</strong> per impedire l'uscita di dati riservati(se i dispositivi all'interno
+                sono stati compromessi)</li>
+        </ul>
+        CONCETTI DI BASE
+        <ul>
+            <li>FIREWALL: non è un unico dipositivo, ma un insieme di componenti hw e sw</li>
+            <li>PUNTO DI PASSAGGIO: unico punto di accesso</li>
+            <li>POLITICA DI DEFAULT DENY: passa solo cio' che è esplicitamente autorizzato</li>
+            <li>ROBUSTEZZA: Deve essere immune ad attacchi, bisogna favorire la sicurezza a discapito dell'accessibilità
+            </li>
+        </ul>
+        VARI MODELLI:
+        <ul>
+            <li>EGGSHELL : a guscio d'uovo: protezione dura all'estrerno, ma che superata lascia le macchine
+                vulnerabili. Da adottare per le macchine che non
+                possono essere protette singolarmente , es. telecamere di sorveglianza , e non consentano
+                l'installazione di sw
+            </li>
+            <li>DEFENCE IN DEPTH: difesa in profondità: ho più zone sicure all'interno , se sui dispositivi è possibile
+                installare altri meccanismi di difesa ancora meglio</li>
+        </ul>
+        </p>
+        <p>
+        <div>di controllo prevedono l'analisi di: <br></div>
+        <ul>
+            <li><strong>Traffico</strong> esamina degli indirizzi, porte, ed altri indicatori al tipo di indirizzo da
+                autorizzare</li>
+            <li><strong>Direzione</strong> discriminare il traffico in base alla direzione, a parità di indirizzi e
+                porte</li>
+            <li><strong>Utenti</strong> differenziare il traffico in base a chi lo genera . N.B nel protocollo TCP/IP
+                non 'è traccia dell'utente che genera il pacchetto</li>
+            <li><strong>Comportamento</strong> valutare come sono usati i servizi permessi, per identificare anomalie
+                (analogo ai sistemi NIDS signature e anomaly based)</li>
+        </ul>
+        <div><strong>Tipologie</strong> si identificano 3 tipologi di Firewall principali: collocabili in posti diversi:
+            BASTION HOST , PERSONAL FIREWALL<br></div>
+        <ul>
+            <li><strong>PACKET FILTER</strong> Esamina unicamente l'header di un pacchetto non il payload, applicando un
+                insieme di regole raggruppate in degli elenchi corrispondenti a punti di controllo diversi
+                (ingress-uscita). Se condizione vera allora azione. Normalmente la prima
+                condizione trovata determina il destino del pacchetto, ma vi possono essere anche varie azioni come
+                loggare i dettagli del pacchetto o modificarlo. Se nessuna regola viene attivata si applica la politica
+                di default: scartare inoltrare accettare.
+                Pro: semplicità e velocità (header standard) tipicamente presente in ogni router.
+                Contro: essendo regole di basso livello, per ottenere comportamenti complessi occorre costruire set di
+                regole articolate . Inoltre i packet filter presentano vulnerabilità e limitazioni:
+                <ul>
+                    <li><strong>Pacchetti frammentati:</strong> poichè il pacchetto IP può essere frammentato, posso
+                        avere diversi pacchetti con header replicato e payload suddiviso. Essendo il payload di un
+                        livello l'header di quello successivo, regole basate sull'header di un certo livello non possono
+                        essere verificate (es. verifcia la porta ).
+                        I frammenti successivi al primo non attivano le condizioni che menzionano parametri dell'header
+                        di trasporto. Possibili attacchi basato su questo. Soluzione drastica scarto i pacchetti
+                        frammentati, oppure li ricostruisco ma è costoso in carico computazionale </li>
+                    <li><strong>Spoofing:</strong> viene cambiato l'indirizzo di destinazione, soluzione: controllare la
+                        coerenza tra indirizzi e interfacce, meno facile per gli ISP , più facile nelle reti foglia
+                    </li>
+                    <li><strong>Porte dinamiche: </strong> non è in grado di lavorare in presenza di protocolli che
+                        negoziano l'apertura di porte dinamicamente es FTP, è diffiicle definire una regola sulla porta
+                        se definita dinamicamente</li>
+                    <li><strong>Data-driven:</strong> non è possibile implementare difese contro attacchi nel payload
+                    </li>
+                </ul>
+                <div>In generale i PF sono stateless(non hanno memoria del traffico passato) sono però possibili PF
+                    stateful. Inoltre è possibile avere anche multilayer procol ispection, firewall che riescono ad
+                    analizzare alcuni elementi
+                    del payload
+                </div>
+            </li>
+            <li>
+                <strong>APPLICATION-LEVEL GATEWAY</strong>: completo e complesso, chiamato anche proxy server.
+                Un ALG è un "man in the middle" buono, che agisce da server nei confronti del client e viceversa. In
+                questo modo è in grado di comprendere i protocolli applicativi
+                e controllare il payload ("fingendosi endpoint"). Per svolgere bene il suo compito deve conoscere i
+                dettagli del protocollo applicativo usato, non esiste un proxy server generico, deve essere composto da
+                tanti moduli.
+                Pro: comprende il protocollo applicativo quindi permette filtraggi avanzati analizzando il payload può
+                fungere da antivirus/antispam ecc.
+                Contro: molto più pesante di un PF. Richiede la configurazione del client
+            </li>
+            <li>
+                <strong>CIRCUIT-LEVEL GATEWAY</strong>: A metà strada tra i due , spezza la connessione a livello di
+                trasporto, diventando end-point del traddico e inoltra il payload senza esaminarlo.
+                Sono usati per determinare quale sia il traffico ammissibile in uscita.
+                Pro: possono essere trasparenti agli utenti per autorizzare solamente connessioni fidate. Può essere
+                usato insieme alle applicazioni per differenziare le politiche sulla base degli utenti : creare dei
+                canali di comunicazione che sono tunnel->openVPN)
+                Contro: Richiede la modifica dello stack dei client
+                Esempio di CLG: SOCKS (socket secure)
+                Un protocollo di livello 5 per lo
+                scambio di pacchetto tra un client ed un server per mezzo di un proxy server.
+                In aggiunta fornisce l’autenticazione dei pacchetti, pertanto solamente gli
+                utenti autorizzati sono in grado di accedere al server. Questo protocollo è
+                lo standard de facto per l’implementazione dei CLG.
+                Socks prevede la possibilità di <em>proxy chaining</em> ovvero l'inoltro di una connessione dal proxy ad
+                un altro ecc fino a giungere al server.
+                Questi principi portano alla realizzazione del concetto di overlay network e onion routing: un sistema
+                di instadamento del traffico che possa incapsulare
+                payload generici scegliendo la rotta a livello applicativo. Questo può essere usato per rendere anonima
+                la provenienza della connessione : protocollo TOR.
+                Tor: (the onion routing) Il protocollo di Tor permette di realizzare connessioni cifrate in cui
+                il legame tra chi effettua richieste e il contenuto delle stesse è profondamente
+                oscurato. Per prima cosa si ottiene un elenco di nodi Tor da un directory
+                server, successivamente ne vengono scelti alcuni casualmente per creare un
+                percorso tra mittente e destinatario su cui inviare un messaggio cifrato a
+                "cipolla", ad ogni hop viene rimosso uno strato di cifratura fino a che il
+                server non è in grado di leggere il traffico in chiaro. I nodi Tor formano
+                un overlay rispetto alla rete internet, pertanto è possibile che tra un nodo e
+                l’altro il traffico attraversi vari router, tuttavia il messaggio è cifrato.
+                Ogni ralay conosce solamente il nodo prima di lui e quello dopo, pertanto
+                viene reso molto difficile scoprire chi sia il vero mittente. Tuttavia il
+                protocollo presenta alcune debolezze intrinseche:
+                <ul>
+                    <li>
+                        è possibile correlare il traffico dei vari nodi per capire quale percorso
+                        facciano i pacchetti, sebbene siano cifrati
+                    </li>
+                    <li>
+                        gli exit node vedono il traffico in chiaro, è sebbene non siano in grado
+                        di capire automaticamente chi sia il mittente i payload dei pacchetti
+                        potrebbe contenere informazioni ben più rilevanti ai fini dell’identificazione
+                    </li>
+                    <li>
+                        è sufficiente che all’interno della rete vi sia anche un solo nodo compromesso
+                        per compromettere l’intera rete
+
+                    </li>
+                    <li>L'uso di Tor aumenta il sospetto delle autorità che potrebbero non accettarlo.
+                        Soluzione BRIDGES : nodi non elencati nelle directory TOR, per non mostrare agli ISP che si sta
+                        usando TOR
+                    </li>
+                </ul>
+
+            </li>
+
+        </ul>
+
+        <div>
+            Collocazione I firewall possono essere collocati</div>
+        <p>
+            I firewall possono essere collocati o su di un sistema dedicato
+            a far girare un software firewall (collocazione Bastion Host), che tipicamente
+            è un ALG od un CLG in quanto i PF sono generalmente integrati
+            all’interno dei router, oppure direttamente su una macchina host (Personal firewall ), sono un'eccezione al
+            principio di controllo della frontiera.
+            Pro: Essendo sulle macchine capiscono se l'applicazione genera un pacchetto lecito o non
+            Contro: Non ho un un singolo punto di accesso, un problema potrebbe rendere l'intera macchina
+            inutilizzabile. Spesso sono configurati
+            in modo anomaly based ma inizialmente non sapendo cosa sia benevolo ho falsi positivi
+            Alcune configurazioni tipiche di firewall (Topologie) sono:
+
+        <ul>
+            <li>screened single-homed BH: un PF garantisce che solo il BH, che implementa
+                un ALG, possa comunicare con l’esterno. Questa configurazione
+                consente un doppio filtraggio (sia da parte del PF che da parte dell’ALG)
+                facendo sì che sia necessario compromettere due sistemi per
+                prendere il controllo dell’intera rete
+            </li>
+            <li>screened dual-homed BH 1 PF e 1 Bh: simile al caso precedente, tuttavia in questo
+                caso il BH si trova a cavallo di dure reti differenti, permettendo la
+                creazione di una rete demilitarizzata in cui inserire i servizi accessibili
+                dall’esterno. Nella rete interna è possibile inserire i client che a questo
+                punto si trovano all’interno di una rete separata e sicura, il cui traffico
+                in uscita tuttavia deve per forza fluire attraverso il BH
+            </li>
+            <li>screened subnet 2 PF 1 BH: permette di rafforzare la separazione tra interno ed
+                esterno nascondendo completamente l’esistenza della rete interna ma
+                consente al router interno di inoltrare il traffico della rete privata senza
+                passare dal BH
+            </li>
+        </ul>
+
+        </p>
+</body>
+
+
+</html>

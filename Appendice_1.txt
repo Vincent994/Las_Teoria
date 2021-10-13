@@ -1,0 +1,29 @@
+PARTIZIONI
+Un disco può essere visto come una fila di byte. Poichè i dischi sono molto capienti ed usare un singolo byte è inutile,
+possiamo dire che un disco è una fila di blocchi numerati, ogni blocco contiene un cetto numero di byte(512-4096).
+Dentro questa fila di blocchi(block device) viene creato un filesystem per mezzo di un'operazione che prende il nome di 
+FRAMMENTAZIONE. Il filesystem è un modo di organizzare i dati , che produce come effetto la possibilità di dare nomi
+simbolici ai file, organizzandoli ad albero gerarchico(grafo acicliclo in Unix)e avere una mappatura tra il nome logico
+e la posizione fisica( il numero di blocco che contiene i dati). Tutti i filesystem, ad eccezione di quelli moderni, danno 
+per scontato che il block-device sia privo di "buchi", sia quindi un insieme di blocchi contigui. La prima posizione è destinata al
+super block: dove vi sono i metadati del filesystem, la seconda contiene l'elenco dei blocchi liberi, la terza gli i-node(descrittori file),
+la quarta i dati referenziati dagli i-node.
+Il partizionamento permette di creare da un unico block device dei sottoinsiemi , ognuno dei quali dotato di un proprio filesystem. Il partizionamento
+si effettua scrivendo all'inizio del disco una tabella, in cui vi è scritto per ognu oartizione il suo numero ordinale, dove inizia/finisce, e di che
+tipo è( label ad uso orientativo). Ogni partizione vive in modo separai dalle altrem posso avere quindi partizioni diverse con filesystem diversi, ognuna con 
+dimensioni diverse. 
+Nei sistemi DOS la visione fisica e logica dei dischi è inseparabile: ad ogni partizione viene assegnaa una lettera
+di unità (C:..,D:..).
+Nei sistemi Linux , invecem esiste un unico albero di directory, e le partizioni sono associate ai "rami" dell'albero
+tramite l'operazione di mount, che rende disponibili le risorse contenute dalla partizione a partire da un mount point.
+Esiste uno standard FHS(filesystem hierarchy standard) che definisce dove mettere le varie cose.
+N.B Unix è nato insieme ad internet , quindi già con l'idea della condivisione dei dati tra macchine diverse, per questo
+un file di configurazione deve trovarsi in una partizione dedicata ai dike statici e non condivisibili(/etc)
+
+                    CONDIVISIBILI               NON CONDIVISIBILI
+
+    STATICI         /usr                                /etc
+                    /opt                                /boot
+
+    VARIABILI       /var/mail                           /var/run
+                    /var/spool/news                     /var/lock

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capitolo_1</title>
+</head>
+
+<body>
+  <h1 style="color: firebrick">Hardening di base</h1>
+  <h3 style="color: coral">Intro</h3>
+  <p align="justify">
+    La sicurezza è un processo, non un prodotto che possa essere comprato,
+    pertanto va analizzata costantemente. Uno dei pochi punti fermi è che la
+    sicurezza si gestisce efficacemente solo vietando qualsiasi comportamento
+    non esplicitamente consentito, e ciò che è consentito deve essere svolto
+    con i diritti più restrittivi compatibili con l'esecuzione del compito.
+  </p>
+
+  <h5>
+    SICUREZZA = RISERVATEZZA - INTEGRITA' - AUTENTICITA' - DISPONIBILITA'
+  </h5>
+
+  <ol>
+    <li>
+      <em>Riservatezza</em> : Le informazioni devono essere svelate solo agli utenti
+      leggitimi
+    </li>
+    <li><em> Integrità </em> : Le informazioni devono rimanere inalterate</li>
+    <li><em>Autenticità</em> : Occorre sempre poter risalire all'autore</li>
+    <li> <em>Disponibilità</em> : Le informazioni devono essere disponibili</li>
+  </ol>
+  Queste quattro proprietà sono diverse e spesso in conflitto. La sicurezza
+  nemica dell'usabilità: Se chiudo un documento in una cassaforte, nel cemento
+  e la butto nel mare, rispetterei le prime tre ma la quarta verrebbe meno
+
+  <hr />
+  <h3 style="color: coral">Messa in sicurezza fisica</h3>
+  <p align="justify">Aspetto spesso dimenticato ma fondamentale, alla base di qualsiasi servizio erogato ci sta un
+    server connesso alla rete.
+    Ci si concentra sugli attacchi provenienti dalla rete ma tutto è vano se l'attaccante accede fisicamente.
+    Le principali minacce sono:
+  <ul>
+    <li> <em>FURTO</em> dello storage o dell'intrero calcolatore</li>
+    <li> <em>CONNESSIONE DI SISTEMI DI RACCOLTA DATI</em> keyrabber, framegrabber ad esempio</li>
+    <li> <em>AVVIO </em> del sistema tramite SO secondari</li>
+  </ul>
+  <h5>Keygrabber: piccola chiavetta che se connessa alla tastiera interccetta cosa scrivo, e se connessa in rete può
+    inviarlo in remoto </h5>
+  <h5>Framegrabber: dispositivo che se connesso allo schermo permette di scattare instantanee del video e renderlo
+    visibile in remoto</h5>
+  N.B
+  Password e cifrature sarebbero inutili <br>
+  Possibili soluzioni:
+  <ul style="list-style-type: circle;">
+    <li> scegliere case chiusi e fissati a rack allarmati</li>
+    <li>installare dispostivi di rilevazioni di intrusione</li>
+    <li>adottare misure che rendono inutile il furto, cifraura</li>
+    <li>disabilitare periferiche non usate</li>
+  </ul>
+  <h4>Pianificazione dell'installazione,per evitare avvi da SO secondari </h4>
+  <span><b>Cosa serve?</b> </span>
+  <div>Le distro hanno procedure di installazione "amichevoli" al termine del quale si hanno un sacco di pacchetti
+    inutili. Installare solo il necessario. Oggi con la virtualizzazione è facile avere un sistema per ogni servizio che
+    si vuole erogare</span> <br>
+  </div>
+  <span><b>Predisposizione dischi per avere integrità disponibilità e scalabilità</b> </span>
+  <div>Separando le partizioni facilmente saturabili da quelle per le attività di sistema (/var, /tmp) o di utente
+    (/home) da quelle essenziali per il sistema operativo ed evitando deny root service.
+    Procedura una volta legata alla fragilità dei dischi</div> <br>
+  <div>Affidando la gestione dello spazio a sistemi di LVM , pagando in complessità</div> <br>
+  <div>Ricorrendo a soluzioni drastihce ma robuste es mount di partizioni in sola lettura</div><br>
+  </p>
+
+  <hr />
+  <h3 style="color: coral"> Boot</h3>
+  <div>Per andare a regime il sistema attraversa un processo di boot che può essere diviso in 4 fasi:</div>
+  <ul>
+    <li>BIOS</li>
+    <p>Basic Input Output System: Sulla mainboad è installata una memoria non volatile che contiene un firmware chiamato
+      bios. Questo è prodotto dal produttore della scheda ed è in grado
+      di individuare i dispositivi connessi, per avviare lo step successivo.
+      E' possibile impostare una password di accesso, tuttavia a questo livello sono facilmente scavalcabili e dunque
+      poco sicure, inoltre la password impedirrebbe un avvio non supervisionato
+
+    </p>
+    <li>BOOT LOADER</li>
+    <p>E' il software che carica il sistema operativo tra quelli installati. Anche questo livello può essere protetto da
+      password utile se si svia dalla procedura standard.
+      Per linux sono presenti due grandi boot loader: LILO , GRUB
+    <ul>
+      <li>LILO usato agli albori</li>
+      <li>GRUB potente e flessibie , dotato di shell. Permette di configurare la procedura di avvio
+        /etc/default/grub contiene le configurazioni di default
+      </li>
+    </ul>
+    <p>Come essere sicuri che ogni componente software sia sicuro e integro? Per essere sicuri occorre un dato
+      immodificabile, una root of trust , radice di fiduce
+      "agganciata" all hardware che mi permetta di verificare e avviare una catena di fiducia.
+      Questa catena di fiducia può essere realizzata in due modi:
+    <ul>
+      <li>TRUSTED BOOT (usa TPM un processore crittografico su mainboard) è un sistema pensato per funzionare in
+        ambienti con scarse capacità computazionali.Nell'attraversamento dei vari step
+        raccoglie prove di violazione di integrità che verranno verificate quando sia ha disposizione abbastanza memoria
+        per fare i calcoli </li>
+      <li>SECURE BOOT (usa UEFI un sw + chiavi firmware collocate su una memoria fisica del pc e accessibili in modo
+        controllato) UEFI è un piccolo SO con partizione dedicata, verifica ogni componente software prima
+        di passare al boot loader tramite l'uso di chiavi crittografiche. A differenza di TPM impedisce lo step
+        successivo. Sul sistema viene installata una platform key, che permette di verificare se esiste sul sistema
+        un componente chiamato SHIM (Pre boot loader), fornita da Windows. Shim a sua volta usa delle MOKS(altre chiavi)
+        per validare il boot loader e moduli custom del kernel. Eventuali componenti aggiuntivi devono essere firmati e
+        poi caricati.
+        Genero le MOKS per il sw custom, deposito le MOKS in SHIM, al boot successivo shim chiede conferma per salvarle
+        in firmware
+      </li>
+      <li>DIFFERENZE il primo verifica l'integrità dei passi e quando si accorge di violazioni blocca l'avvio, il
+        secondo verifica ogni step e non passa al successivo altrimenti</li>
+    </ul>
+    </p>
+    </p>
+    <li>SO</li>
+    <p>Un programma che opera in kernel mode,prende il possesso del pc, predisponendo l'ambiente che l'utente vede e in
+      cui verranno poi lanciati
+      i processi in user mode. Il SO avvia un singolo processo: INIT
+    </p>
+    <li>INIT un processo che si occupa di lanciare tutti gli altri processi: login grafico, configurazione rete ecc</li>
+  </ul>
+
+
+</body>
+
+</html>

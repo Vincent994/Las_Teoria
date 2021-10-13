@@ -1,0 +1,156 @@
+Installazione manuale tipica su Linux
+Il caso tipico è quello tipico di software :
+    -distribuito per mezzo di un archivio tar.gz (Tar=Tape archive prende un elenco di file con i loro
+                                                  contenuti e metadati,come permessi, e li trasforma in 
+                                                  un unico stream di byte.Gz compressore, simile a rar,zip)
+    - scritto in C 
+    -predisposto alla compilazione tramite un toolkit : AUTOCONFIG uno strumento che crea una procedura 
+                                                         da seguire in fase di compilazione   
+                                                        -verifica se soddisfatti i prerequisiti
+                                                        -rileva le versioni e le collocazioni dei pacchetti dipendenti
+                                                        -accetta dall'utente la specifica delle verianti (magari alcuni moduli non mi interessano)
+                                                        -genera i Makefile sulla base delle scelte fatte
+
+I passi tipici sono quindi:
+-Reperimento del sw (es dal browser)
+-Estrazione del pacchetto  (usare tar per ricostruire i file archiviati)
+-Esamina delle scelte possibili ( lanciare configure per esaminare le scelte di configurazione del sorgente)
+-Configurazione dei sorgenti (lanciare lo script per configurare i sorgenti)
+-Compilazione del sorgente 
+-Installazione
+N.B tutti i passi ad eccezione dell'ultimo si limitano a fare read , quindi solo l'installazione può
+richiedere diritti di superutente, ed è questo giusto che sia cosi' perchèse vi sono file "corrotti" se 
+sono superutente nei passi precedenti posso fare danni 
+
+es.
+rm -rf . /x         # al posto di ./x questo indica cancella a partire dalla cartella corrente,
+                    # . /x indica cancella la cartella corrente e a partire da root 
+
+AUTENTICAZIONE 
+Sicuramente avere del codice autentico può essere una buona cautela (il pacchetto che voglio installare
+è leggittimo?)
+Per verificare l'autenticità di un sw serve la firma digitale (hash del file cifrato con chiave privata)
+Per verificare la firma digitale serve la chiave pubblica
+Es:
+    gpg --verify FILE.asc FILE.tar.gz               #verifica il file che ha la firma (.ASCII)
+                                                    #per farlo serve la private key, quindi mi risponde con l'id della pk da usare
+    
+    gpg --keyserver pgpkeys.mit.edu --recv.key <KEY_ID>        #tramite l id della pk lo scarico da un repository di pk (mit) se 
+                                                               #la fonte è pura ok ripeto addesso passo 1
+
+Il pacchetto è sicuro "autentico" , lo estraggo 
+ESTRAZIONE DEL PACCHETTO 
+-Abbiamo visto che solitamente si presenta come archivio tar compresso
+-E' buona prassi determinare una collocazione sensata per i sorgenti ed estrarre li' l'archivio (troppi file nell'archivio)
+-E' prudente testare l'archivio prima di estrarlo per verificare la gerarchia di directory che genera (deve essere una radice)
+Es: cd /usr/local/src 
+tar tvzf net-snmp-5.4.tar.gz        #test
+tar xvzf net-snmp-5.4.tar.gz        #estrai
+
+x esegui 
+v verbose (dettaglia)
+z decomprimi
+f il file  
+
+Devo specificare che deve eseguire su un file perchà essendo un comando datata di 
+default lo faceva sui nastri (tape) /dev/tape
+
+Una volta estratto il pacchetto 
+-Esame delle scelte disponibili : si entra nella directory generata dall'estrazione e si esamina
+ il contenuto solitamente il file README ed INSTALL 
+-Se esiste un eseguibile di nome configure lo si lancia con il parametro --help per ottenere 
+ la lista dei parametri di configurazione disponibili
+-Configurazione dei sorgenti, di nuovo con configure, la procedura genera un config.log 
+ se tutto va bene (altrimenti le dipendenze non sono presenti ecc)
+-Compilazione , si lancia make 
+-Installazione , sudo make install 
+
+L'installazione da sorgenti presenta quindi dei limiti (verifica sorgenti non sempre sicura, aggiornamento , dipendenze)
+Per questo entrano in scena le DISTRIBUZIONI  e i PACCHETTI previsti da essa 
+PRO: L'autenticità viene garantita affidandosi ad un distributore che installa le chiavi e ogni pacchetto viene verificato da esse
+     La gestione automatica delle dipendenze 
+     La garanzia di compatibilità di tutti gli elementi, il distributore mi garantisce che andrà tutto bene anche in caso di aggiornamenti ecc
+     
+
+-Le distro di linux organizzano il sw in pacchetti e dispongono di un package manager per la gestione 
+-Un pacchetto si presenta sotto forma di singolo file che contiene in forma compatta l'insieme di sw precompilato,
+ criteri per la verifica delle dipendenze e compatibilità, procedure di pre/post-installazione
+-La garanzia delle compatibilità con un determinato sistema può essere data solo a patto di vincolare
+ alcuni parametri (archittura dove gira la distro, versione della distro dove anni pari LTS long term support 3-5 anni 
+ anni dispari LTS ma 9 mesi, versione del sw )
+
+-Stabilità vs Aggiornamento 
+Alcune distro devono garantire la stabilità : es RedHatEnterprise non mi interessano gli aggiornamenti 
+ma la stabilità 10-15 anni (uso server e aziendale)
+Altre hanno come filosofia l'inclusione di pacchetti recenti anche a costo di minore robustezza (ARCH),
+ed altre solo a patto che sia ben collaudato (DEBIAN)
+
+-SUPPORTO e DURATA 
+ La disponibilità di supporto garantito è tipica delle distro commerciali ma anche di quelle gratuite
+  in virtù della dimensione degli utenti
+ Per installazione di tipo server esistono varianti LTS (Long Term Support) per 5-7 anni 
+ vengono garantiti aggiornamenti e non modifiche delle API 
+ Ampiezza set pacchetti 1600 distro minimali a 26000 Debian  
+
+ DEBIAN-REDHAT 
+ Le due distro capostipiti da cui sono state derivate quasi tutte le variazioni diffusi 
+ Dei sistemi di gestione dei pacchetti con molte somiglianze
+  -Tool di basso libello per la gestione dei singoli pacchetti 
+  -Tool intermedi per la gestione coordinata delle dipendenze
+  -Tool per il reperimento automatico da repository 
+
+ Pacchetti:
+   -I pacchetti per le distro DEBIAN e derivate sono in formato .deb 
+    aptitude-0.2.15 -2_i386.deb    #nome pacchetto, versione sw, versione pacchetto, architettura
+   
+   -I pacchetti per le distro RedHat e derivate sono in formato .rpm 
+    httpd-2.4.6 -45.gl7.centos.x86_64.rpm    #nome pacchetto, versione sw, versione pacchetto, architettura
+
+Perchè versione del sw e pacchetto? 
+centos  2.4.6-1     2.4.6-2         #versione sw-pacchetto                  
+apache  2-4-6       2.4.7
+        giorno 0 patch giorno x
+Essendo il codice open, può accedere al pacchetto scritto da apache. In seguito alla scoperta di bug
+viene rilasciata una patch e apache passa alla versione successiva che comprende patch e altro.
+Ma centos non può fare lo stesso perchè nessuno gli garantisce che la nuova funziona con la vecchia ,
+quindi fa backporting: prendo solo la patch che risolve i bug, lasciando da parte il resto e 
+la porto sulla verisone precedene, cambiando la versione del pacchetto
+
+REPOSITORY (Magazzino)
+I pacchetti possono essere scaricati e gestiti singolarmente, normalmente però si usano i repo 
+online o locali 
+
+/etc/apt/sources.list           /etc/apt/sources.list.d/*
+
+deb http.// .....                       #debian
+
+/etc/yum.conf                   /etc/yum.repos.d/*.repo 
+
+[base]
+name=CentOS 
+minorlist=http...
+#base url=http...
+pppcheck=1           #controllo la firma
+pppkey=...           #dove si trova la firma
+
+Posso aggiungere o togliere chiavi pubbliche a quelle scaricate con la distro 
+-deb        aptkey {add file |list | del keyid |adv --recv keyid |..}
+-rpm        rpm    {--import | -e | -g[ai]|...}         #tratta le chiavi come se fossero pacchetti
+
+Posso aggiungere o togliere repository (operazione delicata):
+Un'esigenza molto comune è quella di installare sw ben supportato ma non incluso nei canali ufficiali
+della distro 
+Soluzione: si aggiunge il canale(repo) all'elenco 
+Si può generare confusione se un pacchetto con lo stesso nome è presente in più repo 
+-Di default i package manager scelgono le versioni più nuove 
+-Supponiamo di aver aggiunto un repo sconosciuto per l'installazione di un pacchetto , 
+ se successivamente viene aggiunto in questo repo un pacchetto malvagio 
+Occorre fare attenzione
+Controllo della provenienza di un pacchetto: yum    repoquery -i [packagename]  
+                                             apt:   apt-cache showpkg [packagename]
+
+Elenco dei pacchetti provenienti da un repo: yum    yum list installed |grep repo_name
+                                             apt    vari comandi 
+
+Per evitare problemi posso bloccare l'installazione di versioni successive ma drastico,
+costruire il mio repo (rpm)

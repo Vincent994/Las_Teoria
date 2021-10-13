@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Capitolo_3</title>
+</head>
+
+<body>
+    <h3 style="color: coral">3.1 Alta disponibilità</h3>
+    <p>
+        Abbiamo visto che le proprietà di sicurezza dell'informazione sono 4: riservatezza - integrità - autenticità -
+        disponibilità.
+        Le prime 3 le garantiamo tramite meccanismi crittografici, l'ultima necessita di meccanismi sistemistici.
+        La disponibilità di un sistema (o informazione) è la possibilità di accedervi quando è necessario . Possiamo
+        distinguere due tipologie:
+    <ul>
+        <li>
+            Disponibilità a breve termine (o continua): istante per istante i dati/servizi sono fruibili
+        </li>
+        <li>
+            Disponibilità a lungo termine i dati devono essere archibiati per essere conservati. Spesso implica che la
+            fruizione non è immediata,
+            perchè recuperare il dato richiede tempo, inoltre è una proprietà dei dati e non dei sistemi , il sistema
+            deve funzionare in modo continuo
+        </li>
+    </ul>
+    Per garantire disponibilità continua di un sistema si può intervenire su due aspetti:
+    <ul>
+        <li>
+            Costruzione dei componenti: Agendo sulla costruzione posso ridurre il MEAN TIME TO FAILURE (MTTF) tempo
+            medio di fallimento guasti non recuperabili, e il MEAN TIME BETWEEN FAILURE (MTBF)
+            tempo che riguarda i guasti recuperabili (settore danneggiato disco )
+            Ma per abbassare questi tempi spesso occorre spendere molto ed è quindi meglio andare ad intervenire su un
+            altro aspetto: <em>l'architettura</em>, anziché un disco con MTBF basso ma che significa soldi, ne compro
+            due che costano meno
+            (Es. costruzione componenti, tecnologia meccanica implica usura, tecnologia elettronica grading. Nel secondo
+            caso la corretta costruzione è più difficile da verificare , un difetto può
+            provocare la rottura immediata, ma se questo non avviene la sua vita è maggiore. Si effettua il cosiddetto
+            GRADING: se ne produce un lotto dei quali vengono scelti dei campioni, in base alle risposte si classificano
+            in commerciali (poco testati) industriali (a campione) militare (individuale))
+        </li>
+        <li>
+            Architettura:
+            Eliminazione dei Single Point Of Failure per mezzo della <em> Replicazione</em>
+            Agendo su questo aspetto si introduce complessità (es. memorie ecc (error correction code, dotate di un
+            modulo che mi permette di ricostruire il dato corrotto) algoritmi di wear leveling negli SSD (poichè i
+            settori di un SSD ahanno un limite di scrittura, si cerca di usarli tutti) )
+        </li>
+    </ul>
+    </p>
+    <h3 style="color: coral">3.2 Disponibilità/ DownTime</h3>
+    <p>
+        La disponibilità (availability) di un sistema è il rapporto tra tempo in cui eroga i servizi <em>UPTIME</em>
+        rispetto al tempo in cui ci si aspetta
+        che questi vengano erogati (tempo di osservazione)
+        A=U/O
+        Il tempo durante il quale un servizio non è erogabile viene chiamato <em>DOWNTIME</em>.
+        Possibili cause: sw (40%) - DW pianificati (30%) - errore umano che trancia un cavo (15%) - hw (10%) -
+        ambientale (5%)
+    </p>
+    <h4 style="color:blue">3.2.1 Livelli di disponibilità</h4>
+    <p>
+        Comunemente la disponibilità di un sistema viene indicata in modo sintetico col numero di 9 nella percentuale di
+        UPTIME.
+        N.B Aggiungere un 9 significa di ridurre di 10 volte il downtime
+        Disponibilità del 99,9% implica downtime per anno di circa 9 ore per mese di 43 minuti e per week di 10 minuti
+        Disponibilità del 99,999% implica downtime per anno di circa 5 minuti per mese di 26 secondi e per week di 6
+        secondi
+        Five nine è lo standard
+        Questo valore è un indicatore sintetico di alcune caratteristiche del sistema. Un elemento tra quelli previsti
+        dal contratto sul libello di servizio <em>Service Level Agreement</em>. Tra i vari vincoli vi possono essere:
+    <ul>
+        <li>livello di disponibilità su base annua mensile settimanale</li>
+        <li>prestazione dei servizi, risposta pagina web in secondi</li>
+        <li>cosa succede in caso di disservizi ecc</li>
+        <li>modalità di aggiornamento del contratto stesso</li>
+    </ul>
+    </p>
+    <h4 style="color:blue">3.2.2 Ambiente</h4>
+    <p>Per erogare con continuità un servizio, il sistema deve essere acceso e connesso. Il sisteme deve essere inserito
+        all'interno di un ambiente
+        adatto, all'interno del quale vengono garantite alcune caratteristiche quali:
+    <ol>
+        <li>Resistenza della struttura ad eventi catastrofici artificiali e naturali
+        </li>
+        <li>Sicurezza e controllo degli accessi</li>
+        <li>Condizionamento dell'aria e gestione della temperatura
+        </li>
+        <li>Condizionaento dell'alimentazione elettrica e sistemi di continuità</li>
+        <li>Connettività di rete</li>
+    </ol>
+    Dettagli in seguito.
+    <h4 style="color:blue">3.2.3 Data center problematiche e caratteristi che deve soddisfare</h4>
+    Poichè i costi associati alla costruzione e al mantenimento di queste strutture sono molto elevati, diventa
+    indispensabile condividerle secondo diverse modalità:
+    <ul>
+        <li><strong>Housing o Co-location</strong> il data center fornisce spazio e connettività per garantire il
+            funzionamento dei sistemi.
+            L'acquisto o la gestione dei sistemi è a carico del client (macchina acquistata dal cliente)</li>
+        <li><strong>Managed Housing</strong> il data center fornisce anche i sistemi (hw dedicato) e assistenza </li>
+        <li><strong>Hosting</strong> il data center fornisce uno o più servizi specifici su hw condiviso fra clienti
+            (capacità computazionale che dedico al cliente può essere su hw diversi). Il modello "cloud" è un caso
+            particolare di hosting </li>
+    </ul>
+    <ol>
+        <li><strong>Resistenza della struttura</strong>: cause naturali (terremoti, inondazioni), cause
+            artificiali(incidenti aerei, ferroviari), cause interne(incendi, con ridondanza di sistemi di sicurezza )
+        </li>
+        <li><strong>Sicurezza e controllo dell'accesso</strong>: perimetro esterno blindato, staff armato h24,
+            segmentazione in settori con visite concordate , videosorveglianza con registazione offline non eliminabile
+        </li>
+        <li><strong>Condizionamento dell'aria</strong>: gestione della temperatura e umidità con sistemi tolleranti ai
+            guasti</li>
+        <li><strong>Condizionamento dell'alimentazione elettrica</strong>: erogazione su almeno due linee indipendenti,
+            pulizia della sinusoide per allungare la vita degli apparati ed evitare sbalzi di tensione, e sistemi di
+            continuità ed intevento istantaneo e durata prolungata tramite batterie e generatori</li>
+        <li><strong>Consumi</strong>: energie rinnovabili</li>
+        <li><strong>Connettività di rete</strong>: un data center si avvarrà di provider indipendenti. E' comune per i
+            data center principali avere oltre 10 carrier (operatori di tlc): Telco (sono di proprietà dei
+            carrir)Carrier neutral altrimenti.
+            Spesso fungono da Internet Exchance (contengono punti di interconnessione di internet). I cavi vengono
+            collocati in punti diversi per ridondanza ed evitare interruzione linea</li>
+    </ol>
+    </p>
+    <h3 style="color: coral">3.3 Disponibilità continua dei dati</h3>
+    <p>Il componente più soggetto ai guasti è quello più sollecitato meccanicamente è l'hhd (usura/limiti strutturali
+        SSD)
+        <strong>RAID</strong> (Redundant Array of Indipendent Disks) è la tecnologia più diffusa per proteggere un
+        sistema dal guasto di un disco ed è un approccio di architettura.
+        Il costo di un disco cresce più velocemente del MTTF . Il disco non avvisa quando si rompe, anzichè investire su
+        un disco molto robusto è meglio combinare N dischi, complessità come contro,
+        la gestione dei metadati di allocazione, devo sapre dove e come scrivere il dato sugli N dischi.
+        Sono disponibili si implementazioni hw che sw:
+    <ul>
+        <li>HW : il controller sulla mainboard sgraba la CPU dei calcoli necessari e nasconde al SO i dettagli. In
+            alcuni sistemi sono proprietari e spesso
+            è difficile recuperare dati corrotti, non ho il controllo completo.
+        </li>
+        <li>SW: economico, è il sw che si occupa di comunicare con i dischi</li>
+    </ul>
+    </p>
+    <h4 style="color:blue">3.3.1 RAID levels</h4>
+    <p>Esistono diverse tipologie di RAID, ognuna identificata da un livello.
+    <ul>
+        <li><strong>RAID 0 (striping)</strong>:(distribuisce non replica,PRO velocità, CONTRO non replica ) Distribuisce
+            i dati su più dischi. Solitamente viene usato per incrementare le prestazioni, poichè è possibile eseguire
+            scritture e letture parallele sui dischi, tuttavia la corruzione di un disco causa la perdita dei dati
+            dell'intero RAID, non è un vero RAID</li>
+        <li>
+            <strong>RAID 1 (Mirroring)</strong>; Replica integralmente i dati su tutti i dischi dell'insieme.Questa configurazione è robusta ai guasti, in quanto
+            continua a funzionare fintanto che esiste un disco integro. Inoltre migliora le prestazioni in lettura perchè è possibile eseguire letture parallele. Contro: capacità dimezzata, se ho 2 dischi ho la capacità di 1
+        </li>
+        <li>RAID 2, 3, 4 ormai sostituiti da RAID 5. Superano il limite dello 0(non replica) e dell 1 (capacità dimezzata).Su un disco dedicato vengono inseriti i dati aggiuntivi che permettono di ricalcolare una o più stripe in caso di perdita. Ma questo è un limite, essendo su un solo disco ogni modifica implica accessi su quel disco (il collo di bottiglia del sistema). Il RAID 5 distribuisce il bit di parità su dischi diversi </li>
+        <li><strong>RAID 5</strong> Viene introdotto un blocco di parità , il cui posizionamento cambia. Grazie a questo blocco è possibile ricalcolare il contenuto di un blocco danneggiato. Offre protezione dal fallimento di un disco unico. 
+        Quando un disco viene danneggiato l'array funziona in modalità degradata. Se si tratta di una disconnessione temporanea (filo staccato) si procede ad una risincronizzazine dei dischi. Se un disco è rotto viene inserito un nuovo disco e ricostruito a partire dai restanti. Questa operazione è lenta, fino a 10 ore per via dei tera di dati. 
+        Tolleranza guasti 1 disco.
+     </li>
+     <li><strong>RAID 6</strong> simile al RAID 5 ma con due blocchi di parità, tolleranza al guasto di due dischi</li>
+     <li><strong>RAID_LIVELLI COMPOSTI</strong> E' possibile ottenere dei RAID composti mettendo in cascata dei RAID semplici, cosi facenfo si ottengono dispositivi a blocchi più performanti e/o robusti.
+        Un livello RAID 0 aggrega i dischi senza spreco di capacità e velocità, un livello è RAID 1 o RAID 5 per la robustezza (es RAID 10, RAID 50)</li>
+    </ul>
+    In caso di guasti si può far ricorso a dei dischi "SPARE": essi sono dei dischi di scorta che vengono usati in caso di corruzione di un disco dell'array
+
+    </p>
+    <h4 style="color:blue">3.3.2 MULTIPATH</h4>
+    <p>Oltre alla ridondanza dei dischi, può essere necessario prevedere una tolleranza ai guasti sia dei <em>componenti di controllo</em>, che dei <em>percorsi di connessione</em>.
+        Per fare ciò si rende necessario dell'hardware specializzato che permette di creare più percorsi di accesso allo stesso disco, oppure del supporto da parte del SO per gestire correttamente la molteplicità dei percorsi.
+        In linux sono presenti tool quali <em>md per fare i RAID</em> e <em>dm per il multipath, percorsi diversi anche per unico disco</em>. Il multipath hw consente di sdoppiare i percorsi per raggiungere un disco. E' necessario un controller
+        che permetta il raggiungimento dei disco tramite percorsi differenti indipendenti. es FA-CL (due connettori in/out per predisporre un loop) e SAS (due porte da innestare su due backplane (gruppo di connettori in parallelo))        
+    </p>
+    <h4 style="color:blue">3.3.2.1 Strumenti Linux per l'implementazione</h4>
+    <p><em>md</em> è l'erede dei classici raidtools ed è orientato alla creazione di sistemi RAID, fornendo supporto base anche per il multipath. E' costituito da un driver modulare del kernel, che rende possibile caricare solamente i moduli di cui si
+        necessita. Questo dirvere consente di combinare qualsiasi block device per formare un nuovo md block devic, che può essere usato come se forsse un normale disco (eventualmente come base per un ulteriore md device).
+        Su tutti i dischi dell'array è presente un persistent superblockn che contiene i metadati relativi allo stato dell'array e consente la rilevazione automatica del RAID. La configurazione viene effettuata tramite il tool <em>mdadm</em>.
+        Quando le cose vanno male è possibile entrare in modalità recovery, ripopolando un disco con i dati letti dagli altri dischi, oppure risincronizzando il disco guasto. In alternativa si può tentare un recovery forzato dei dati.
+    </p>
+    <p><em>dm</em> sta per device apper ed è un modulo del kernel che, mappa blocchi dei dispositivi reali (target device) su blocchi di dispositivi virtuali (mapped device). La politica per mappare viene definita in userspace. Ognu dispositivo è visto dal sistema come un dispositivo a blocchi.
+    Il tool di base è <em>dmsetup</em>, tramite esso si configura un mapped device , su cui leggere e scrivere, provocando in realtà scritture e letture su target device in accordo alla politica descritta nella tabella di mapping.
+Per fare questo ho bisogno di:
+<ul><li>un target drive
+</li>
+<li>un elenco di target device
+</li>
+<li>una tabella di mapping</li></ul>  </p>
+I target drivere (algoritmi per creare mappature) sono:
+<ul>
+    <li>linear: permette di concatenare target device (blocchi uno dietro l'altro)</li>
+    <li>striped: permette di implementare un RAID0  </li>
+    <li>mirror: permette di implementare un RAID1</li>
+    <li>multipath: selezione del percorso di accesso al target device</li>
+    <li>snapshot: emula lato filesystem ciò che avviene nella virtualizzazione, creare dischi virtuali che sembrano completamente modificabili
+        (il disco della VM viene indicizzato da un file nel disco host e le dufferenze sono un altro file, i quali vengono poi combinari per dare l'illusione di possedere hhd)
+
+    </li>
+    <li>crypt: cifratura e decifratura dei dati</li>
+    <li>error: simula errori ai fini di test</li>
+</ul>
+Sebbene sia possibile usare dmsetup anche per fini complessi, esistono alcune applicaazioni di più alto livello che permettono di gestire, in modo migliore, alcuni task particolari:
+Per avere alta disponibilità: dmraid , dm_multipath: fornusce percorsi multipli per l'accesso allo storage. Permette di configurare le modalità tramite cui testare salute dispositivo e frequenza test 
+Per sicurezza e flessibilità d'uso dei device: dmcrypt, LVM2
+<em>LVM2</em>: permette di creare partizioni flessibili 
+E' un sistema che permette di astrarre la gestione dello spazio disponibile fornendo un'interfaccia più ricca di quella di dmsetup. Grazie ad esso è possibile ridimensionare facilmente le partizioni a secondo delle neccessità.
+(Piccola parentesi,nella realtà infatti è possibile si partizionare i dischi, creando diverse partizioni sullo stesso disco. Dopo avere creato le partizioni, per poterle usare devo formattarle, cosi facendo vengono creati i metadati che mi permettono poi di allocare i dati veri e propri. 
+Nel caso del filesystem Unix viene creato un superblocco che mi dice com'è fatto l'elenco dei blocchi liberi, la tabella degli i-node, i limiti delle aree e i blocchi dati. Questo però viene fatto a patto che non ci siano buchi, i blocchi devono essere contigui.
+Se voglio quindi ridimensionare una partizione devo spostare le altre, operazione complessa e rischiosa, con LVM2 non ho questo problema.)
+L'architettura è a livelli, partendo dal più basso:
+<ol>
+    <li>Il primo livello prevede i dischi fisici (veri o raid) e vengono contrassegnati come PV (Phisical Volume) fonte di blocchi disponibili.
+    </li>
+    <li>A questo punto i PV vengono "riversati" in una vasca chiamata Volume Group, un elenco di blocchi numerati che possono provenire da fonti diverse</li>
+    <li>Da questi VG creo i Logical Volume(equivalenti alle partizioni) elencgu cioè di blocchi che costituiscono dischi da partizionare e formattare per contenere un filesystem. I blocchi di un LV non è detto che siano contigui nel VG, qui sta la novità. In LVM i blocchi vengono chiamati Physical Extent.
+    </li>
+</ol>
+
+<p>Dopo aver creato questi sistemi che adesso sono flessibili, affidabili e veloci, sarebbe conveniente darli usare a macchine diverse per via del loro costo.
+    Se volessi realizzare in modo "artigianale" un sistema simile posso usare
+    <em>DRBD</em> un sistema per lo storage replicato su piataforme Linux. 
+    Es: ho due macchine (2cpu,2 ram ecc) e per replicare i datti da una all'altra faccio in modo che su entrambe ci sia un disco virtuale. Ogni scrittura su questo viene poi replicata localmente e via rete ai nodi connessi. In questo modo riesco a tollerare il guasto su una macchina.
+    <em>DRBD</em> è implementato come un insieme di driver kernel ed un insieme di applicativi user-space. Propone diverse modalità di comunicazione tra host e di scrittura su disco,permettendo così di troavare un buon compromesso tra latenza ed affidabilità, assime ealla possibilità di integrazione con sistemi cluster. Ogni volta che viene effettuata una scrittura su disco la modifica viene propagata via rete agli altri nodi connessi. A questo scoppo esistono più
+    protocolli, ognuno con un diverso grado di affidabilità, differenziati dai requisiti necessari a considerare completa una scrittura sul nodo per: 
+    <ul>
+        <li>
+            Protocollo A (asincrono): la scrittura si considera effettuata nel momento in cui i dati vengono inseriti nel buffer TCP locale
+        </li>
+        <li>Protocollo B (semi-sincrono): la scrittura si considera completata se i dati hanno raggiunto il nodo remoto</li>
+        <li>Protocollo C (sincrono): la scrittura si considera effettuata se viene confermata la scrittura sul disco del nodo remoto</li>
+    </ul>
+    Non essendoci un arbitro, occorre definire dei ruoli tra i nodi per evitare accessi contemporaneei in scrittura ad esempio.
+    <strong>Primary vs Secondary. </strong>Un nodo è primary se può usare il dispositivo virtuale , è secondary altrimenti, anche se partecipa attivamente al mirroring dei dati fra locale e remoto (quando arriva una scrittura la replica nel disco locale) non può usare il dispositivo virtuale.
+    Grazie a questa distinzione di ruolo si individuano due modalità principali di esecuzione:
+    <ul>
+        <li>
+            Single primary mode: un solo nodo primary, gli altri sono secondary. Se il primary fallisce, uno dei nodi secondary può essere promosso.  
+        </li>
+        <li>Dual primary mode: è possibile che coesistano più nodi primary per la stessa risorsa. In questo caso è necessario adottare politiche specifiche per risolvere problemi legate alla concorrenza, ad esempio tramite un lock manager o tramite cluste filesystem. Prima di acquisire la risorsa si verifica che nessun altro la stia usando</li>
+    </ul>
+    In ogni caso è sconsigliabile andare a manipolare i dischi usati da BRDB, in quando all'interno di ogni disco è contenuta una sezione di metadati necessari al corretto funzionamento. Questi metadati consentono inoltre di risincronizzare i dischi in caso di interruzione temporanea. 
+    <em>Configurazione. </em>La configurazione di DRBD è gestita tramite il file /etc/drbd.conf , esso contiene l'elenco delle risorse da usare, quali siano i loro nomi sui vari nodi e quale sia l'indirizzo ad esse associato. E' necessario che il file sia identico su ogni nodo della rete. Il funzionamento delle singole
+    risorse può essere gestito tramite l'applicativo drbdadm il quale premette di attivare/disattivare una risorsa sul nodo locale, di connettere/disconnettere temporanemente una risorsa e monitorarne lo stato.
+</p>
+<strong>Filesystem distribuiti</strong>
+<p>Un componente essenziale, per la realizzazione di sistemi scalabili e affidabili è uno storage condiviso. Esistono due grandi approcci: <strong>NAS e SAN</strong>
+<strong>NAS:</strong> Ho un unico gestore, i client sono indipendenti. I dati sono sui di un sistema che li conserva in un filesystem locale. L'organizzazione tra metadati e dati è gestita localmente. Poichè i dati sono gestiti da un sistema apposito non è necessario introdurre delle forme di collaborzione tra client. In Linux i file vengono erogati ai client tramite un protocollo NFS, in microsoft tramite CIFS.
+Il punto di forza di questo sistema è l'indipendenza dei client, se tanti client vogliono accedere allo stesso file , dal punto di vista del NAS equivale ad avere tanti processi che chiedono di accedere allo stesso filesystem e sa gestire la cosa. Se voglio evitare che due processi accedano allo stesso file, devo implementare a livello di processo quindi applicativo, dei meccanismi di locking.
+(controllo se c'è il lock, se non c'è, lo acquisisco opero e lo rilascio). 
+N.B Ogni operazione sul filesystem implica un'operazione su due livelli diversi,ad esempio se dico che voglio fare una write su di un file quello che succede è leggere i metadati , trova un blocco vuoto, prenotalo e scrivi. Poichè i metadati non sono visibili ai client allora sono sicuri.
+<strong>NFS:</strong> è un protocollo di rete C/S per la creazione di filesystem distribuiti NAS basato su SunRPC (Remote Procedure Call: attivazione di un programma su pc diverso). I server NFS sono senzza stato, quindi ogni operazione richiesta dal client è autocontenuta, server più snelli. E' un sistema multidemone, sul server NFS girano tanti processi, ognuno dei quali si occupa di un servizio. Il protocollo non offre alcun meccanismo di sicurezza o di autenticazione se non quelli basati sul controllo di indirizzo e porta
+<strong>SAN:</strong> i dati sono conservati allo stato grezzo sul sistema, esiste un protocollo in grado di erogare dei blocchi ai client, di conseguenza il file system è definito dai client che devono cooperare al fine di gestire 
+gli accessi concorrenti al disco. Tecnologie per fare SAN: AoE (ata over Ethernet economico ed efficiente ma solo per LAN), iSCSI(pesante e costoso aiscasi), FC_AL costosissimo anello di fibra ottica che collega i dischi e percorribile in entrambe le direzioni.  Il protocollo SAN è più leggero ma è più complesso per quanto riguarda la gestione della concorrenza. Le macchine client non possono essere indipendenti, devono implementare sistemi per dialogare. Ci sono due soluzioni:
+<ul>
+    <li>Per mezzo di sistemi di <strong>Locking distribuito</strong> approccio moderno e semplice 
+    </li>
+    <li>per mezzo di <strong>Cluster filesystem</strong> overhead elevato </li>
+</ul>
+<strong>Locking distribuito:</strong> è un approccio molto comune. Nel mio calderone ho il mio disco e tramite LVM ricavo tanti Logical_Volume, ognuno dei quali viene usato come storage di una macchina virtuale e quindi conterrà un filesystem. A questo punto un client chiede l'accesso non al macro dispositivo
+ma al LV e per farlo userà un sistema di locking distribuito per non far accedere allo stesso momento client diversi allo stesso LV. Quando un client vuole usare un LV acquisisce un lock impedendo ad altri lo stesso. Non è fattibile con i file perchè non posso avere un lock sui metadati.
+
+</p>
+<p><strong>Cluster filesystem</strong>: se si vuole accedere direttamente ad un block device da parte di molti client, serve un meccanismo di arbitraggio distribuito.
+ Un Cluster filesystem si occupa contemporaneamente di organizzare i file su un block device, come un normale filesystem, e di gestire l'accesso concorrente dei diversi client ed eventualmente di replicare i dati su nodi diversi.
+</p>
+<h3 style="color: coral">3.3 Disponibilità dei sistemi</h3>
+<p>Oltre alla disponibilità dello storage occorre assicurarsi che tutte le altre componenti siano disponibili e affidabili: alimentazione (ridondante), memoria(a correzione di errore), ventilazione, schede, connessione alla rete, chipset e processore( meno facile avere ridondanza, servono sistemi custom, ad ogni ciclo di clock devo avere sui sistemi la stessa istruzione in esecuzione,molto costosi e poco scalabili come sistemi NEC è un produttore).
+    Si può procedere alla duplicazione di ogni componente del sistema, ma l'architettura risultate sarebbe molto costosa e complessa. Esistono due approcci alternativi nella definizione di risorse logiche:
+    <ul>
+        <li>Virtualizzare il sistema per poterlo riprodurre su di un host diverso semplicemente copiando una manciata di file,anche a computer acceso. Il sistema  risultante presenta una buona scalabilità, anche se l'overhead è elevato, la macchina deve accendersi. Benefici: isolamento tra VM quindi sicurezza, <em>server consolidation</em> ho un uso efficace delle risorse, inizialmente "one service, one server", ora invece in un host ho più macchine virtuali 
+            Occorre realizzare più copie dello stesso sistema, ciascuna con tecnologie standard(cluster high availability). Questa soluzione è economica ed efficiente ma soffre di maggior problemi di scalabilità.
+            N.B Virtualizzare il sistema: tramite snapshot , fotografie del sistema, funziona se non ho molte applicazioni che manipolano dati in ram, in questo caso la clonazione non rispecchierebbe la realtà. Soluzione è un agente che recupera i dati in Ram delle applicazioni. 
+            Ho diversi host quindi con diverse VM, se uno va down allora attivo la copia sull'altro. Ma i diversi host devono "parlarsi".Cluster HA , aggregati di macchine fisiche che cooperano per erogare servizi. Per mettere in piedi un cluster occorre implementare un protocollo di <strong>Heartbeat battito di vita</strong>.
+            Le risorse sui diversi nodi si scambiano periodicamente dei pacchetti di heartbeat per comunicare la presenza:
+            <ul>
+                <li>E' consigliabile avere più link per non confondere un fallimento di link con quello di nodo, anche cavo si'</li>
+                <li>Non è sufficiente per capire se il servizio viene erogato correttamente, risposte sensate del server: pagina web o 501?</li>
+            </ul> 
+            La scomparsa e ricomparsa di noti attivi richiede la gestione di due possibili condizioni:
+            <ul>
+                <li><strong>Failover</strong>: situzione in cui un nodo si guasta e le risorse del cluster lo devono sostituire: Nodo 1 smette di funzionare e nodo 2 se ne accorge avvia la VM per erogare quel servizio. Possibili problemi: è realmente guasto? o non riesce a comunicare, in questo caso ho uno split brain, ovvero due VM che erogano lo stesso servizio su nodi diversi e possibile accesso a risorse condivise.
+                </li>
+                <li><strong>Failback</strong>: situzione in cui un nodo precedentemente down si riattiva, cosa fare? ho due opzioni: 'nice Failback' continuo a fare erogare il servizio da quello che lo stava sostituendo, 'auto Failback' sfrutto al meglio la potenza di calcolo , chi dichiarato maste riprende la risorsa quando ritorna online (piccole rogne: problemi termici , la macchina master va down per alte temperature ogni 10 minuti, ha senso l'auto failback?) </li>
+            </ul>
+            Tipicamente, dopo che la rilevazione di un guasto di un nodo, un altro ne prende in carico i servizi, eventualmente assumendone anche l'identità in rete. Ip_takeovr è la scelta più comune, ad ogni nodo viene associato un indirizzo IP reale (fisso) ed al cluster un indirizzo collettivo (floating IP, considerato un alias dell'IP del master). In caso di fallimento del master il nodo che ne prende il posto assume l'indirizzo collettivo.
+        </li>
+        <li><strong>Partizionamento</strong> Nella realtà ho tanti nodi in un cluster (esempio poste e sportelli). Idealmente: ogni nodo può funzionare o è disconnesso daglia altri. Nella realta: un guasto può partizionare il cluste in un sub-cluster. All'interno del sub-cluster i nodi possono vedersi o meno, in ogni sub-cluster ogni macchina deve capire se può acceder ea risorse condivise ed erogare un servizio o deve farsi da parte per evitare conflitti. Anche in assenza di guasti, i transitori (boot,shutdown)possono creare problemi perchè la macchina non è funzionante appieno, è necessario non escludere una macchina che sta cercando di unirsi ad un sub-cluster.
+        Un modo per garantire che un sub-cluster non acceda a risorse condivise è il cosiddetto "FENCING->recinzione". Questo può essere resource: soft, ogni nodo può pricare l'accesso a date risorse ad esempio spegnendo la porta dello switch.Oppure node fencing: hard, spegnere il nodo direttamente tramite schede a gestione remota (DRAC).
+        Ma chi deve fare il fencing e chi lo deve subire? Utilizzo del "quorum". Nei nodi con N>2 si usa un sistema di maggioranza, il sub-cluster che ha la maggioranza decide su quello minoritario. Nel caso di cluster a due nodi si usano sistemi di arbitraggio esterni.
+    </li> 
+    </ul> 
+    <strong>Sintesi:</strong> Lo scopo dei sistemi cluster è <em>erogare in alta disponibilitàle risorse</em> adottando inizialmente un approccio decentrakizzato (non esiste un nodo essenziale, dialogano ed erogano servizi)
+    MA questo approccio nella realtà non scala bene ed è molto sensibile all'heartbeat in reti molto trafficate è facile perdere pacchetti (nodo vivo o meno?). L'approccio moderno: <strong>Sistemi cloud</strong>: sistemi chiave + compute nodes su cui collocare i servizi. In ogni caso il downtime tipico è superiore al minuto: occorre il tempo per capire se un nodo è guasto (troppo basso: guasto o nodo in boot?) più tempo di failover per attivare il nodo secondario, non si possono quindi garantire i five nines.
+    Approcci alternativi: hardware-> ridondanza completa hw, molto costoso e poco scalabile, vanno a coppie. Ho due macchine completamente sincronizzate, tutto deve essere custom per avere istante per istante lo svolgimento della stessa istruzione.
+    Software-> ho due macchine fisiche su cui vado a duplicare le funzioni virtualizzate. Se un host va down perdo al massimo la connessione corrente. Non ho failover quindi ho five nines. Il carico inoltre viene distribuito su due host.
+    <strong>Cloud computing</strong> Le architetture HA, sebbene molto solide, hanno costi elevate, per molte tipologie di progetti, piccoli dinamici ecc, vi sono soluzioni differenti.
+    Il cloud computing permette di affrontare con maggiore efficienza molte tipologie di progetti: (AWS -> pochi centesimi euro all'ora, pago per il tempo che voglio):
+    <ul><li>piccoli o con fattori di utilizzo lontani dal 100% (utilizzo medio lontano da quello di picco , su cui però viene dimensionato l'acquisto). Oppure che hanno un traffico che dipende dalla stagione , in tal caso richiedo le risorse quando mi servono</li>
+    <li>medi e grandi per via dell'investimento iniziale (capitale che non ho)</li></ul>
+    <li>con aspettative di forte crescita, ma senza certezza sui tempi e la riuscita</li>
+    Se i miei progetti sono invece abbastanza statici, potrebbe avere senso comprare una macchina e metterla in un data center (costi fissi).
+    <strong>Il cloud provider</strong> si fa carico della realizzazione dei data center, edifici impianti e calcolatori. Le risorse disponibili vengono poi usate per far funzionare sistemi virtualizzati: i clienti condividono le risorse fisiche (una VM su un server con varie VM) ma hanno l'impressione di lavorare su macchine dedicate configurabili tramite interfacce spesso web.Questo comporta un sistema molto scalabile. I cloud provider,permettono di far usare ai clienti risorse on demand, su richiesta, si parla di RAAS (resource as a service).
+    Attori principali sono IBM, GOOGLE, AMAZON, MICROSOFT.
+    Livelli:
+    <ul><li>Alla base di un cloud si trova l'architettura reale, costituita da vari server</li>
+    <li>Al di spora di essa viene costruito lo strato di infrastruttura. Il provider vende pezzi di infrastruttura: una VM con le caratteristiche desiderate (capacità di calcolo , ram ecc) SO, utenti, policy di sicurezza vanno settati a parte. Si parla di IAAS( Infrastructure as a service)</li>
+    <li>Strato superiore-> di piattaforma  PAAS(platform as a service). Oltre alla VM viene configurato anche il SO e sw desiderato, il cliente carica solo il codice che deve girare.</li>
+    <li>Ultimo strato sw, mette a disposizione software scritto da qualcun altro , i clienti forniscono solo i dati. Si parla di SAAS(sw as a service) esempio suite google, sw di machine learning ecc</li>
+</ul>
+N.B La virtualizzazione è nata intorno al 1960 , era necessario infatti virtualizzare le grosse macchine mainframe per via dei costi, meglio avere una macchina e virtualizzarla. Mancava però la gestione di questa virtualizzazione, oggi questa è robusta e configurabile dall'utente anche tramite browser.
+</p>
+<h3 style="color: coral">3.4 Tecniche per la salvaguardia dei dati: Backup</h3>
+<p>Per quanto un sistema possa essere sicuro, non potrà ignorare comandi errati, bug, o sopravvivere ad eventi disastrosi o conservare un'immagine della situazione ad un dato istante. Quindi sono <strong>sempre necessari</strong> sistemi di backup e di recovery.
+Anche se ho un sistema RAID perfetto devo fare i backup. <em>Il backup consiste nel <strong>copiare dati dal sistema live ad un supporto offline</strong>, diverso da dove sta quello che produce i dati</em>.E' un'operazione impegnativa, di conseguenza va organizzata bene: vi deve quindi essere
+<ul>
+    <li>un incaricato al backup</li>
+    <li>bisogna decidere cosa copiare</li>
+    <li>la frequenza, una volta al mese? troppo poco</li>
+    <li>quando tempo deve essere conservata la copia</li>
+    <li>dove conservarla</li>
+    <li>dove saranno ripristinate (compatibilità di piattaforma) Floppy anni 80', oggi sono riutilizzabili?</li>
+</ul>
+<em>Strategie:</em>
+<ul>
+    <li><strong>FULL:</strong> è la copia completa di ogni file nel filesystem,lento e ingombrante, ma da fare almeno una volta</li>
+    <li><strong>INCREMENTALE: </strong> è la copia dei soli file cambiati rispetto ad una data di riferimento. Adatto all'esecuzione frequente,per il ripristino servono però sia il full che l'incrementale. Posso realizzarlo tenendo come riferimento il full (ripristino facile , ogni differenza viene salvata, dimensione elevata); oppure differenziale , in questo caso il punto di riferimento
+    diventa l'incrementale precedente, ho bisogno di tutti gli incrementali per il recovery ma dimensione minore.</li>
+</ul>
+Cautele per i backup:
+<ul>
+    <li><strong>Correttezza copia:</strong> controllare che quello che leggo sia coerente -> programmi con fati in Ram necessitano di agent,componenti hw, che li leggano bloccandoli per pochi istanti.Il backup andrebbe fatto a riposo</li>
+    <li><strong>Protezione dei dati:</strong> è bene cifrare i backup</li>
+    <li><strong>Integrità: </strong> occorre fare attenzione a non sovrascrivere dei volumi</li>
+    <li><strong>Affidabilità dei supporti:</strong> copiando i dati su un supporto fisico, la vita stessa del supporto è limitata (graffi, smagnetizzazione, obsolescenza hw es floppy, o sw dati realizzati con sw vecchio proprietario che oggi non esiste più). Ma anche per resistere a disastri ambientali , da non sottovalutare il furto.</li>
+    <li><strong>Facilità di reperimento: </strong> devono essere organizzati per garantire facilmente il ripristino di ciò che è desiderato.</li>
+</ul></p>
+Tecnologie: i primi strumenti di storage erano i nastri: basso costo per byte, alta capacità, vi erano sistemi proprietari e incompatibili tra loro oggi abbiamo il consorzio LTO linear tape open.
+<ul>
+    <li>per i sistemi di fascia medio-bassa si usano i dischi </li>
+    <li>per i sistemi di fascia alta si usano soluzioni a nastro performanti, con lettore costoso e nastri economici. Infatti i nastri costano meno, pesano meno , crollo pavimento Facebook dovuto ai dischi, e sono affidabili rispetto ai dischi intrinsecamente complessi</li>
+    <li>altri player i supporti ottici ma poca capacità, di contro sono intrinsecamente write once read many , non possono essere riscritti.</li>
+</ul>
+Nastri tradizionali: stile videoregistratore a cassetta.
+Nastri moderni: linear tape: testina ferma e nastro che scorre velocemente(variazione del campo magnetico per scrivere)
+Hanno sistemi di compressione, spesso la dimensione che indicano include il fattore di compressione, ma i dati multimediali sono già compressi alle volte.
+
+
+</body>
+
+</html>

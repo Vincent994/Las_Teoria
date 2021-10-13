@@ -1,0 +1,35 @@
+Monitoraggio della rete: il protocollo SNMP 
+SNMP(Simple Network Management Protocol ) è un protocollo di livello applicativo (UDP porta 161 gli agent, porta 162 i manger) creatp per ottenere, in modo uniforme e standard
+informazioni relative ad apparati spesso molto differenti tra loro. SNMP standardizza il modello dei dati, le proprietà di un apparato di rete, e il modello di interazione per far comuniscare dispositivi ed entità che gestisce.
+Es: se voglio fare monitoraggio da una macchina su un dispositivo, all'interno del dispositivo avrò le infromazioni, come sono scritte e in che modo le posso richiedere e intepretarle? tutto questo è stato standardizzato. Ogni proprietà del device ha un codice identificativo , al quale corrisponde una stringa per definire tale proprietà.
+Modello dei dati: voglio una strutturazione gerarchica globale, per avere una collocazione ad ogni proprietà di un oggetto (dove si trova, quante porte ha ecc), per farlo uso un albero in cui posso individuare ogni nodo scrivendo in sequenza i nodi che si devono attraversare. Ho una radice definita da "." da cui si diramano tre rami , due di competenza delle maggiori organizzazioni di standardizzazione e uno congiunto
+0: ITU-T
+1: ISO quello che ci riguarda
+2: join-iso-itu-t
+I nodi hanno un identificativo numerico e simbolico. Es .1.3.6.1 == iso.identified-organizaition.blabla.internet
+
+All'interno di SNMP le informazioni sono organizzate all'interno di una struttura gerarchica ad albero detto MIB: collezione degli oggetti gestiti. Gestire però un albero intero sarebbe impossibile, per queso motivo è spesso un sottoalbero (un pezzo). Un MIB associa ad ogni oggetto:
+-un OID, rappresenta in astratto il nodo dell'albero.
+-una sintassi (tipo di dato: scalare come nome host termina con uno zero, tabella come un'interfaccia di rete colonna.riga)
+-una codifica (descrizione per rendere possibile la comunicazione tra apparati diversi).
+Ogni entità interessata a descrivere proprietà rilevanti di un certo contesto può definire un suo MIB: esempio se un produttore immette sul mercato un nuovo dispositivo come una webcam con supporto snmp, che dispone di proprietà non presenti (es rilevazione temperatura)in un MIB globale
+
+All'interno dell'albero MIB globale esistono alcuni MIB notevoli tra cui: 
+-MIB-2: collocato sotto .1.3.6.1.2.1, include le informazioni essenziali per la gestione degli apparati di rete. Per migliorarne l'estensibilità è suddiviso in sottomoduli.
+-PEN (privaate entrpise number): collocato sotto .1.3.6.1.4.1 è dedicato a moduli specifici richiesti da entri privati (ovvero non ISO). Di particolare interesse all'interno di questo sottoalbero si trovano UCD-SNMP che permette l'accesso ai parametri base del SO, NET-SNMP-EXTEND-MIB che permette di consulare l'output delle direttive extend, trasformandolo in un managed object (oggetto gestito, proprietà dispositivo).
+I MIB possono essere richiesti allo IANA , l'ente no profit che assegna i numeri.
+Il dispositivo prende il nome di NETWORK ELEMENT
+Sul network element è in esecuzione l'AGENT (sw/firmaware che accede a memoria e registri dei network element per rendere visibili i loro contenuti sotto forma di managed object, proprietà, usando un protocollo standard di rete).
+Il componente che accede agli agent è chiamato MANAGER, tipicamente parte di un NMS (Network Management System). I manager sono più semplici degli agenti, perchè si limitano a fare richieste. Il modello manager-agent è simile a quello C/S ma il manger rispecchia il client, l'agent il server. A volte l'agent prende l'iniziativa di contattare il manager.
+Protocollo a livello applicativo trasportato su UDP, agent in ascolto su port 161 i manager su 162, tre versioni "e mezzo", v1,v2,v2c,v3 niente più manager-agent unificati in entities inoltre non ho le community . Le prime due scarsamente sicure. Tre livelli di autorizzazione: read-only,read-write,trap. Ogni livello è identificato da una stringa e svolge il ruolo di nome e password, se lo conosco ottengo i privileggi di quel livello.
+Alcuni comandi : GetRequest (richiede il valore associato ad una proprietà), SetRequest (per settarlo), GetNextRequest(dammi quelli successivi a quello specificato), Trap( notifica asincrona dall'agent al manager), ecc. 
+Alternative a SNMP: tante ma non più semplici.
+Nuovi linguaggi per scrivere le informazioni: YANG ,nuovi protocolli per inviare le informazioni come NETCONT.
+SNMP e alternative sono strumenti per scambiare informazioni e un amministratore di rete deve sempre disporre di un NMS. Deve disporre di un inventario dei network element, che gli permetta di creare template per le diverse tipologie e facilmente portabile (quando avviene x avvisami), che gli permetta di gestire in modo raggruppato le macchine , e gestire le credenziali. Questi dati devono essere raccolti e significano quantità enormi, ma devono anche essere successivamente analizzati (come trovare un dato specifico). Un approccio seguito  adottare un approccio agent-based: realizzo un agent per ogni piattaforma e creo un protocollo che lo fa comunicare con il NMS. Pro: crando l'agent posso racogliere dati più ricchi di quelli presenti nei MIB esistenti,LIMITI: se non posso installare l'agent come nei sistemi embedded (integrati). Gli NMS basati su agent proprietari sono in grado di fare polling su SNMP standard per integrare le fonti.
+Es: Se ho 2 switch connessi tra loro, ognuno dei quali ad ogni porta ha connessi vari host, tra cui quello dell'amministratore di rete, come faccio a rendere sicuro il passaggio di pacchetti? Essendo v1 e v2 di SNMP non cifrati?
+Ipotesi 1 : cambio e passo ad apparati che supportono SNMP v3 costoso.
+Ipotesi 2: cambio e passo ad apparato che supporta IPsec (layer 3 e dispositivi switch layer 2)
+Ipotesi 3: Firewall che cambi i mac address sorgente ma non estraneo a spoofing 
+Ipotesi 4: VLAN creo una rete virtuale locale
+PORT BASED: In uno switch decido che alcune porte appartengono ad una VLAN e le altre ad un'altra VLAN, i pacchetti non passano dalle porte di VLAN diverse.
+TRANKING MODE: Una porta può appartenere a VLAN diverse, riceve i pacchetti di entrambe, ma se il pacchetto è contarassegnato allora è destinato alla VLAN corretta.

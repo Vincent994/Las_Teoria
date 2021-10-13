@@ -1,0 +1,152 @@
+KLOGD demone di Bsd-syslog(obsoleto)
+Il nostro sistema come sappiamo ha due layers: le applicazioni stanno in user space e
+il kernel in kernel space(memoria non swappable e limitata). Il kernel deve essere un 
+processo efficiente non può scrivere su disco perchè collo di bottiglia del sistema, 
+per questo motivo per fare logging usa quello che viene chiamato RING-BUFFER. Buffer 
+circolare dotato di 2 indicatori: 
+qual è la prima cella libera dove scrivere, e qual è quella che devo leggare.
+Questa struttura si trova in RAM, se non fosse cosi' veloce da svuotare questo buffer 
+alcune celle possono essere sovrascritte(velocità a discapito dell'integrità).
+In BSD-syslog il demone KLOGD era addetto a svuotare questo buffer e a mandare messaggi 
+dal buffer al disco. Rsyslog ha integrato i messaggi di logging applicativi e di kernel,
+infatti prima se accadeva qualcosa di anomalo prima di init non lo sapevo.
+L'architettura di BSD-syslog è quella di un componente che può essere alimentato da una varietà di processi,
+che in modo concorrente mandano messaggi,che vengono serializzati(verranno visti in modo sequenziali) 
+gli viene assegnato un indicatore temporale univoco e inviati alla destinazione.
+Può essere visto come un collettore e distributore di informazioni.
+
+Ogni messaggio è etichettato 
+<facility>.<priority>  
+argomento/tipo: auth,authpriv,cron,daemon,ftp,kern,lpr,mail,news,syslog,user,vucp,local0..local7 (custom)
+importanza in ordine decrescente: emerg,alert,crit,err,warning,notice,info,debug (meno importante)
+
+Le destinazioni possibili sono:
+-File: identificato da path assoluto                                              es. /var/log/messaggio
+-STDIN di un processo: identificato da una pipe verso il programma da lanciare    es " | /bin/analizzatore"
+-Utenti collegati (in passato era comune collegarsi fisicamente)
+-Server syslog remoto       @indirizzo oppure @nome               #deve esserci un processo syslog in ascolto
+
+N.B la comunicazione avviene di default su UDP:514
+
+I selettori:
+in /etc/syslog.conf  vi sono le regole di smistamento di base dei messaggi
+-ogni riga per ogni regola, il messaggio può finire su diverse destinazioni
+-trattamento delle priority: 
+    -soglia : una regola con una certa prority fa match con tale priority e superiori ,
+              a meno che non sia preceduta dal simbolo uguale ".="
+    -priority speciale: nome server per ignorare i messaggi con la facility indicate 
+
+Esempio
+kern.*              /dev/console               #i messaggi con facility kern di qualsiasi priority vanno su /dev/console
+*.info; mail.nome;  /dev/log/messages          #i messaggi di ogni tipo con priority info o superiore ad eccezione della facility mail vanno su /var/log/messages
+*.=warning          @loghost                   #i messaggi di qualsiasi facility con priority uguale a warning vanno sul server remoto(in ascolto) loghost
+
+
+RSYSLOG (evoluzione del primo)
+Struttura modulare per caricare solo le funzioni necessarie: supporta vari protocolli in ingresso 
+e moltissime destinazioni). Se ho bisogno di un modulo particolare, lo importo
+
+Esempio             Versione 8.4                    Versione 8-16
+
+caricare            $ModLoad imudp                  module(load="imudp")
+config              $ UdpServerRun 514              input (type="imudp" port=514)
+
+File di configurazione modulare:
+-Direttive globali in /etc/rsyslog.conf                             #parti da queste
+-Direttive specifiche in file seprati sotto /etc/rsyslog.d          #se devo inserire un modulo lo faccio qui senza compromettere tutto
+
+Mentre Bsd-syslog usa facility.priority 
+Rsyslog usa dei meccanismi più complessi basati su template che permettono di definire il nome del file di destinazione in base ad una elaborazione fatta sul messaggio stesso.
+-Per usare un protocollo diverso da UDP(evitando la perdita di messaggi) @@  (indica usa TCP)
+
+es:
+ *.*    @@indirizzo
+
+-Per passare il messaggio come parametro di un programma ^
+
+es:
+ *.*    ^programma;template
+
+COMANDI PER IL MONITORAGGIO SU Linux
+Perchè usare dei comandi al posto degli strumenti analizzati? Perchè permettono di capire real time 
+cosa sta succedendo, gli strumenti visti sono molto complessi e spesso basta poco per ottenere lo stesso
+risultato.I macro parametri che voglio tenere sotto controllo sono le attività degli utenti:
+chi si collega, quando e come:
+
+    utenti      file        processi        spazio
+                
+                fuser       ps              df
+     who                    top             du
+     last                   uptime          free                
+                      lsof          vmstat
+                                    iostat 
+In dettaglio
+-who    chi è connesso
+
+-last   una cronologia delle connessioni
+
+-fuser  chi sta usando un certo file; posso farlo anche con lsof
+
+-ps     scatta un'istantanea dei processi attivi 
+
+-top    riassunto aggiornato e interattivo( da non usare negli script)
+        Riassume ps,uptime,free si aggiorna automaticamente 
+
+-uptime da quanto il sistema è attivo e carico di lavoro (istantanea carico del sistema)
+        solo dei processi nella coda dei processi ready che attendono di usare la CPU.
+        I 3 valori indicati sono relativi alla media dei processi nella coda ready 1 5 15 minuti (per capire come sta andando)
+
+-df     uso delle partizioni del disco
+
+-du     spazio usato in una gerarchia di direttorio
+
+-free   uso della memoria RAM (istantanea)
+
+-vmstat utile invocarlo col periodo in secondi per monitorare processi, memoria, trap ecc
+
+-iostat statistiche uso CPU e I/O 
+
+-df     mostra l'uso dello spazio su disco (molto veloce perchè legge quando spazio è disponibile da superblock)
+
+-du     mostra l'uso del disco di ogni singolo file in ogni direttorio e sotto direttorio (molto pesante) 
+        con opzione -s fa un summary non mostrando i dettagli delle sotto cartelle
+
+-free
+
+-fuser  quali processi stanno usando un certo file
+
+-lsof   elenca tutti i file impegnati da tutti i processi 
+
+USO DEI FILE 
+I processo usano i file, i file sono usati dai processi
+Per sapere quali file sono usati da un certo processo:
+Tutte le informazioni dei file da parte dei processi sono rintracciabili nel filesystem speciale /proc
+
+ls -l /proc/2208/fd             #pid/filedescriptor file
+
+output:
+total 0 
+rwx--------- 1 root root 64 Apr 26 10:11 0->/dev/pts/0      #in genere STDIN
+                                         1->/dev/pts/0      #in genere STDOUT
+                                         2->/dev/pts/0      #in genere STDERR
+
+Per capire il contrario: quali processi usando un certo file
+-fuser 
+fuser /etc/man.config           #chi sta usando questo file?
+
+output:
+/etc/man.config     2208    2212        #pid processi che lo usano
+
+N.B IMPORTANTE 
+Un file cancellato (in realtà è un unlink) dopo l'apertura sarà irreperibile sul filesystem,
+ma referenziato dal processo che ha fatto la open su di esso e quindi visibile con lsof
+Spiegazione:
+Tra le informazioni del comando ls -l vi è il numero di hard ling che il file ha sul filesystem .
+Un file è infatti rappresentato dall'inode il quale referenzia anche i blocchi dati. In seguito ad una open,
+il processo riesce a vedere l'inode e quindi i blocchi dati del file. Con rm, viene decrementato il numero
+di link a quel file. Sto eliminando dall'interno della directory che contiene quel file la riga che
+individua quel file. Se il numero di link arriva a zero, il garbage collection(spazzatura) marca l'inode 
+di quel file come libero e quindi riutilizzabile. Se però quel file è in realtà aperto da un processo
+rimane utilizzabile fino a quando il processo,che lo usa, non fa la close(). 
+Quindi con df non lo vedrei mentre con lsof si. Quando il processo termina, e quindi fa la close, il file, 
+con link 0, viene perso per sempre  
